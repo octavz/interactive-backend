@@ -31,5 +31,5 @@ trait HTTPSpec extends Matchers {
     for {
       r <- response
       _ <- Sync[F].delay(assert(r.status == expectedStatus, s"Status was ${r.status} instead of $expectedStatus."))
-    } yield ()    
+    } yield ()
 }

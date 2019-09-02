@@ -1,9 +1,9 @@
-scalaVersion              := "2.12.8"
-name                      := "starterkit"
-organization              := "com.organization"
-scalafmtOnCompile         := true
-fork in Test              := true
-parallelExecution in Test := true
+ThisBuild / scalaVersion   := "2.12.8"
+ThisBuild / name                      := "starterkit"
+ThisBuild / organization              := "com.organization"
+ThisBuild / scalafmtOnCompile         := true
+ThisBuild / fork in Test              := true
+ThisBuild / parallelExecution in Test := true
 
 lazy val Versions = new {
   val kindProjector = "0.10.3"
@@ -20,11 +20,15 @@ lazy val Versions = new {
   val quill = "3.3.0"
   val tapir = "0.9.0"
 }
-addCompilerPlugin("org.typelevel" %% "kind-projector" % Versions.kindProjector)
-addCompilerPlugin("org.scalamacros" %% "paradise"     % Versions.scalamacros cross CrossVersion.full)
+
+lazy val core = (project in file("core")).settings(
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % Versions.kindProjector),
+  addCompilerPlugin("org.scalamacros" %% "paradise"     % Versions.scalamacros cross CrossVersion.full),
+  libraryDependencies ++= commonDeps
+)
 
 // Scala libraries
-libraryDependencies ++= Seq(
+val commonDeps = Seq(
   "dev.zio" %% "zio"                                     % Versions.zio,
   "dev.zio" %% "zio-interop-cats"                        % Versions.zioInteropCats,
   "org.http4s" %% "http4s-core"                          % Versions.http4s,
@@ -45,12 +49,9 @@ libraryDependencies ++= Seq(
   "com.softwaremill.tapir" %% "tapir-openapi-docs"       % Versions.tapir,
   "com.softwaremill.tapir" %% "tapir-openapi-circe-yaml" % Versions.tapir,
   "com.softwaremill.tapir" %% "tapir-json-circe"         % Versions.tapir,
+  "com.h2database" % "h2"              % Versions.h2database,
+  "ch.qos.logback" % "logback-classic" % Versions.logback,
   "org.scalatest" %% "scalatest"                         % Versions.scalaTest % "test",
   "com.danielasfregola" %% "random-data-generator"       % Versions.randomDataGenerator % "test"
 )
 
-// Java libraries
-libraryDependencies ++= Seq(
-  "com.h2database" % "h2"              % Versions.h2database,
-  "ch.qos.logback" % "logback-classic" % Versions.logback
-)
