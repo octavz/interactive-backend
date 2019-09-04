@@ -4,10 +4,12 @@ import com.wantsome.interactive.model.database.User
 import com.wantsome.interactive.model.{DBError, Error, NotFoundError, UnexpectedError}
 import com.typesafe.config.Config
 import io.getquill.{H2JdbcContext, SnakeCase}
-import zio.ZIO
+import zio._
+import doobie._
 
 trait LiveUserRepository extends UserRepository {
   val config: Config
+  val transactor: Transactor[Task]
 
   override val repository: UserRepository.Service = new UserRepository.Service {
     lazy val ctx = new H2JdbcContext(SnakeCase, config)

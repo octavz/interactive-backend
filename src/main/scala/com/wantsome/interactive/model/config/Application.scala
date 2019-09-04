@@ -10,9 +10,9 @@ import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.types.net.UserPortNumber
 
 final case class Application(
-  server: Server,
-  database: Database
-)
+                              server: Server,
+                              database: Database
+                            )
 
 object Application {
 
@@ -21,10 +21,11 @@ object Application {
     env[UserPortNumber]("server.port"),
     env[Refined[String, NonEmpty]]("dataSource.className"),
     env[Refined[String, NonEmpty]]("dataSource.url"),
+    env[Refined[String, NonEmpty]]("dataSource.schema"),
     env[Refined[String, NonEmpty]]("dataSource.user"),
     env[Refined[String, NonEmpty]]("dataSource.password")
-  ) { (url, port, className, dataSourceUrl, user, password) =>
-    Application(Server(url, port), Database(className, dataSourceUrl, user, password))
+  ) { (url, port, className, dataSourceUrl, schema, user, password) =>
+    Application(Server(url, port), Database(className, dataSourceUrl, schema, user, password))
   }
 
   val getConfig: Application = config.orThrow()
