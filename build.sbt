@@ -20,23 +20,39 @@ lazy val Versions = new {
   val quill = "3.4.3"
   val tapir = "0.10.1"
   val doobie = "0.8.0-RC1"
+  val finch = "0.26.0"
 }
 
 lazy val root = (project in file(".")).settings(
   addCompilerPlugin("org.typelevel" %% "kind-projector" % Versions.kindProjector),
   addCompilerPlugin("org.scalamacros" %% "paradise" % Versions.scalamacros cross CrossVersion.full),
-  libraryDependencies ++= commonDeps
+  libraryDependencies ++= coreDeps
+).dependsOn(verifyr)
+
+lazy val verifyr = (project in file("verifyr")).settings(
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % Versions.kindProjector),
+  addCompilerPlugin("org.scalamacros" %% "paradise" % Versions.scalamacros cross CrossVersion.full),
+  libraryDependencies ++= verifyrDeps
 )
 
 // Scala libraries
 val commonDeps = Seq(
   "dev.zio" %% "zio" % Versions.zio,
   "dev.zio" %% "zio-interop-cats" % Versions.zioInteropCats,
+  "ch.qos.logback" % "logback-classic" % Versions.logback,
+  "org.tpolecat" % "doobie-core_2.12" % Versions.doobie,
+  "org.tpolecat" %% "doobie-postgres" % Versions.doobie,
+  "org.tpolecat" %% "doobie-hikari" % Versions.doobie,
+  "io.circe" %% "circe-generic" % Versions.circe,
+  "org.scalatest" %% "scalatest" % Versions.scalaTest % "test",
+  "com.danielasfregola" %% "random-data-generator" % Versions.randomDataGenerator % "test"
+)
+
+val coreDeps = Seq(
   "org.http4s" %% "http4s-core" % Versions.http4s,
   "org.http4s" %% "http4s-dsl" % Versions.http4s,
   "org.http4s" %% "http4s-blaze-server" % Versions.http4s,
   "org.http4s" %% "http4s-circe" % Versions.http4s,
-  "io.circe" %% "circe-generic" % Versions.circe,
   "io.getquill" %% "quill-jdbc" % Versions.quill,
   "is.cir" %% "ciris-cats" % Versions.ciris,
   "is.cir" %% "ciris-cats-effect" % Versions.ciris,
@@ -50,12 +66,10 @@ val commonDeps = Seq(
   "com.softwaremill.tapir" %% "tapir-openapi-docs" % Versions.tapir,
   "com.softwaremill.tapir" %% "tapir-openapi-circe-yaml" % Versions.tapir,
   "com.softwaremill.tapir" %% "tapir-json-circe" % Versions.tapir,
-  "com.h2database" % "h2" % Versions.h2database,
-  "ch.qos.logback" % "logback-classic" % Versions.logback,
-  "org.tpolecat" % "doobie-core_2.12" % Versions.doobie,
-  "org.tpolecat" %% "doobie-postgres" % Versions.doobie,
-  "org.tpolecat" %% "doobie-hikari" % Versions.doobie,
-  "org.scalatest" %% "scalatest" % Versions.scalaTest % "test",
-  "com.danielasfregola" %% "random-data-generator" % Versions.randomDataGenerator % "test"
-)
+) ++ commonDeps
+
+val verifyrDeps = Seq(
+  "com.github.finagle" %% "finchx-core" % Versions.finch,
+  "com.github.finagle" %% "finchx-circe" % Versions.finch,
+) ++ commonDeps
 
