@@ -16,3 +16,19 @@ object UserRepo {
   }
 
 }
+
+trait UserRepo {
+  def userRepo: UserRepo.Service
+}
+
+trait LiveUserRepoService extends UserRepo.Service {
+  import UserRepo._
+
+  override def saveUser(): RIO[Env, User] = ???
+}
+
+trait LiveUserRepo extends UserRepo {
+  import UserRepo._
+
+  override def userRepo: Service = new LiveUserRepoService {}
+}

@@ -1,6 +1,8 @@
 package com.wantsome
 
-package commons.finch
+package whiz
+
+package finch
 
 import com.twitter.io.Buf
 import scala.util.Try
