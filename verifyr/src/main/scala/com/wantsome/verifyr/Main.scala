@@ -1,18 +1,29 @@
-package com.wantsome.verifyr
+package com.wantsome
 
-import com.twitter.finagle.{Http, Service}
+package verifyr
+
+import com.github.plokhotnyuk.jsoniter_scala.core.JsonValueCodec
+import com.github.plokhotnyuk.jsoniter_scala.macros.{CodecMakerConfig, JsonCodecMaker}
 import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.{Http, Service}
 import com.twitter.util.Await
-import zio._
+import com.wantsome.commons.models.User
 import io.finch._
 import zio.interop.catz._
-//import io.finch.catsEffect._
-import io.finch.circe._
-import io.circe.generic.auto._
+import zio._
+import commons.finch.JsonIter._
 
-object Main extends zio.App with EndpointModule[Task]{
+object Registrator {
+  trait Env
 
+  trait Service {
+    def registerUser(): RIO[Env, User]
+  }
+}
+
+object Main extends zio.App with EndpointModule[Task] {
   case class Message(hello: String)
+  implicit val codec: JsonValueCodec[Message] = JsonCodecMaker.make[Message](CodecMakerConfig())
   implicit val runtime = this
 
   def healthcheck: Endpoint[Task, String] = get(pathEmpty) {
@@ -33,8 +44,7 @@ object Main extends zio.App with EndpointModule[Task]{
       .serve[Application.Json](helloWorld :+: hello)
       .toService
 
-  Await.ready(Http.server.serve(":8081", service))
-
   override def run(args: List[String]): ZIO[Main.Environment, Nothing, Int] =
-    ZIO.effectAsync[Any,Throwable, Unit](cb => )
+    ZIO.effectTotal(Await.ready(Http.server.serve(":8081", service))) *> ZIO.never
+
 }
