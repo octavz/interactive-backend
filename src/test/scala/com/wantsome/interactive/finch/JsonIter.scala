@@ -1,15 +1,13 @@
-package com.wantsome
+package com.wantsome.interactive.finch
 
-package whiz
-
-package finch
-
-import com.twitter.io.Buf
-import scala.util.Try
-import io.finch.internal.{HttpContent, Utf32}
 import java.nio.charset.StandardCharsets
+
+import com.github.plokhotnyuk.jsoniter_scala.core.{JsonValueCodec, readFromByteBuffer, readFromString, writeToString}
+import com.twitter.io.Buf
+import io.finch.internal.Utf32
 import io.finch.{Decode, Encode}
-import com.github.plokhotnyuk.jsoniter_scala.core._
+
+import scala.util.Try
 
 object JsonIter {
 

@@ -1,6 +1,6 @@
-CREATE DATABASE whiz;
+CREATE DATABASE interactive;
 
-\c whiz;
+\c interactive;
 
 CREATE TABLE users
 (

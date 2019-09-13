@@ -1,6 +1,4 @@
-package com.wantsome
-
-package interactive
+package com.wantsome.interactive
 
 object Quzz {}
 

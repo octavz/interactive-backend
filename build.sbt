@@ -25,9 +25,9 @@ lazy val commons = (project in file("commons")).settings(
   name := "commons"
 )
 
-lazy val interactive = (project in file("interactive")).settings(
-  name := "interactive",
-  libraryDependencies ++= interactiveDeps
+lazy val testr = (project in file("testr")).settings(
+  name := "testr",
+  libraryDependencies ++= testrDeps
 ).dependsOn(commons)
 
 lazy val verifyr = (project in file("verifyr")).settings(
@@ -35,10 +35,10 @@ lazy val verifyr = (project in file("verifyr")).settings(
   libraryDependencies ++= verifyrDeps
 ).dependsOn(commons)
 
-lazy val whiz = (project in file(".")).settings(
-  name:= "whiz",
-  libraryDependencies ++= whizDeps
-).dependsOn(verifyr, interactive)
+lazy val interactive = (project in file(".")).settings(
+  name:= "interactive",
+  libraryDependencies ++= interactiveDeps
+).dependsOn(verifyr, testr)
 
 // Scala libraries
 val commonDeps = Seq(
@@ -61,15 +61,15 @@ val commonDeps = Seq(
   % Versions.randomDataGenerator % "test",
 )
 
-val interactiveDeps = Seq(
+val testrDeps = Seq(
 ) ++ commonDeps
 
 val verifyrDeps = Seq(
 ) ++ commonDeps
 
-val whizDeps = Seq(
+val interactiveDeps = Seq(
   "com.github.finagle" %% "finchx-core" % Versions.finch,
-  "com.github.pureconfig" %% "pureconfig" % "0.11.1",
+  "com.github.pureconfig" %% "pureconfig" % "0.11.1"
 ) ++ commonDeps
 
 

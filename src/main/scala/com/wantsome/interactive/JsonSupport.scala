@@ -1,4 +1,4 @@
-package com.wantsome.whiz
+package com.wantsome.interactive
 
 import com.wantsome.commons.models.User
 import com.github.plokhotnyuk.jsoniter_scala.macros._
