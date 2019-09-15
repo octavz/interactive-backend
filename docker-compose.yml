@@ -9,7 +9,5 @@ services:
     image: postgres
     ports:
       - 5432:5432
-    volumes: 
-      - /migrations/1.sql:/docker-entrypoint-initdb.d/1.sql
     environment:
-      - POSTGRES_PASSWORD=admin
+      - POSTGRES_PASSWORD=postgres

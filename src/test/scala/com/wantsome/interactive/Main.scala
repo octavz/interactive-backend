@@ -8,7 +8,8 @@ import com.twitter.finagle.{Http, Service}
 import com.twitter.util.Await
 import io.finch.catsEffect.{get, path, pathEmpty}
 import io.finch._
-import com.wantsome.interactive.finch.JsonIter._
+
+import finch.JsonIter._
 
 object Main extends App {
   implicit val codec: JsonValueCodec[Message] =

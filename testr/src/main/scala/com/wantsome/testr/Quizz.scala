@@ -1,4 +1,4 @@
-package com.wantsome.interactive
+package com.wantsome.testr
 
 object Quzz {}
 

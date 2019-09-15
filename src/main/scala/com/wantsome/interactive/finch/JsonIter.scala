@@ -2,8 +2,9 @@ package com.wantsome.interactive.finch
 
 import java.nio.charset.StandardCharsets
 
-import com.github.plokhotnyuk.jsoniter_scala.core.{JsonValueCodec, readFromByteBuffer, readFromString, writeToString}
+import com.github.plokhotnyuk.jsoniter_scala.core.{readFromByteBuffer, readFromString, writeToString, JsonValueCodec}
 import com.twitter.io.Buf
+import com.twitter.io.Buf.ByteBuffer.Owned
 import io.finch.internal.Utf32
 import io.finch.{Decode, Encode}
 
@@ -18,9 +19,9 @@ object JsonIter {
   implicit def decodePlayJson[A](implicit reads: JsonValueCodec[A]): Decode.Json[A] =
     Decode.json {
       case (buf, StandardCharsets.UTF_8 | StandardCharsets.UTF_16 | Utf32) =>
-        Try(readFromByteBuffer(buf.asByteBuffer): A).fold(Left.apply, Right.apply)
+        Try(readFromByteBuffer(Owned.extract(buf)): A).fold(Left.apply, Right.apply)
       case (buf, cs) =>
-        Try(readFromString(buf.asString(cs)): A).fold(Left.apply, Right.apply)
+        Try(readFromString(Buf.decodeString(buf, cs)): A).fold(Left.apply, Right.apply)
     }
 
   /**
