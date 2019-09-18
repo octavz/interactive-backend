@@ -6,10 +6,9 @@ import com.github.plokhotnyuk.jsoniter_scala.macros.{CodecMakerConfig, JsonCodec
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.{Http, Service}
 import com.twitter.util.Await
-import io.finch.catsEffect.{get, path, pathEmpty}
+import com.wantsome.interactive.finch.JsonIter._
 import io.finch._
-
-import finch.JsonIter._
+import io.finch.catsEffect.{get, path, pathEmpty}
 
 object Main extends App {
   implicit val codec: JsonValueCodec[Message] =

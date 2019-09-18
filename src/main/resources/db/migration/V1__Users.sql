@@ -1,7 +1,3 @@
-CREATE SCHEMA IF NOT EXISTS interactive;
-
-SET search_path TO interactive;
-
 CREATE FUNCTION set_update_date() RETURNS TRIGGER AS $set_update_date$
 BEGIN
   NEW.updated := current_timestamp;
