@@ -2,12 +2,12 @@ package com.wantsome
 
 package commons
 
-package models
+package config
 
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.NonEmpty
 
-case class Database(
+case class DatabaseConfig(
   className: Refined[String, NonEmpty],
   url: Refined[String, NonEmpty],
   schema: Refined[String, NonEmpty],

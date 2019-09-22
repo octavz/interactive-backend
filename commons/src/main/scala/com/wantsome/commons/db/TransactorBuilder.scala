@@ -1,17 +1,18 @@
-package com.wantsome.commons
+package com.wantsome.commons.db
 
+import com.wantsome.commons.config.DatabaseConfig
 import doobie.Transactor
 import doobie.hikari.HikariTransactor
+import eu.timepit.refined.auto._
 import zio._
 import zio.interop.catz._
-import models._
-import eu.timepit.refined.auto._
+
 import scala.concurrent.ExecutionContext
 
 object TransactorBuilder {
 
   def mkTransactor(
-    config: Database,
+    config: DatabaseConfig,
     connectEC: ExecutionContext,
     transactEC: ExecutionContext): Managed[Throwable, Transactor[Task]] = {
     val xa = HikariTransactor

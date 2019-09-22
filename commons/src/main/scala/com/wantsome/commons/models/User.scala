@@ -4,18 +4,25 @@ package commons
 
 package models
 
-import java.time._
+import db._
 
 case class User(
-  email: String,
-  firstName: String,
-  lastName: String,
-  birthday: LocalDate,
-  city: String,
-  phone: String,
-  occupation: String,
-  field: String,
-  englishLevel: String,
-  itExperience: Boolean,
+  id: Option[Id],
+  email: DbString,
+  firstName: DbString,
+  lastName: DbString,
+  birthday: String,
+  city: DbString,
+  phone: DbString,
+  occupation: ComboId,
+  fieldOfWork: ComboId,
+  englishLevel: ComboId,
+  itExperience: ComboId,
   experienceDescription: Option[String],
-  heardFrom: Option[String])
+  heardFrom: ComboId)
+
+/*
+{ "email":"test@exmaple.com", "firstName":"John", "lastName":"Popescu", "birthday":"1980/31/21",
+"city":"Iasi", "phone":"+40742012378", "occupation":5, "fieldOfWork":4, "englishLevel":3,
+"itExperience":2, "heardFrom":1 }
+ */

@@ -1,29 +1,84 @@
-CREATE FUNCTION set_update_date() RETURNS TRIGGER AS $set_update_date$
-BEGIN
-  NEW.updated := current_timestamp;
-  RETURN NEW;
-END;
-$set_update_date$ LANGUAGE plpgsql;
+create function set_update_date() returns trigger as $set_update_date$
+begin
+  new.updated := current_timestamp;
+  return new;
+end;
+$set_update_date$ language plpgsql;
 
-CREATE TABLE users
-(
-    id CHARACTER VARYING(250) PRIMARY KEY,
-    email CHARACTER VARYING(250) UNIQUE NOT NULL,
-    first_name CHARACTER VARYING(50) NOT NULL,
-    last_name CHARACTER VARYING(50) NOT NULL,
-    birthday CHARACTER VARYING(50) NOT NULL,
-    city CHARACTER VARYING(250) NOT NULL,
-    phone CHARACTER VARYING(250) NOT NULL,
-    occupation CHARACTER VARYING(250) NOT NULL,
-    field CHARACTER VARYING(250) NOT NULL,
-    english_level CHARACTER VARYING(250) NOT NULL,
-    it_experience CHARACTER VARYING(250) NOT NULL,
-    experience_description CHARACTER VARYING(250) NOT NULL,
-    heard_from CHARACTER VARYING(250) NOT NULL,
-    created TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated TIMESTAMPTZ NOT NULL DEFAULT now()
+create table english_level_c(
+    id serial primary key,
+    value varchar(200) not null unique,
+    label varchar(200)
 );
 
-CREATE TRIGGER set_timestamp_users
-BEFORE UPDATE ON users
-FOR EACH ROW EXECUTE PROCEDURE set_update_date();
+insert into english_level_c(value,label) values('Beginner','Beginner');
+insert into english_level_c(value,label) values('Average','Average');
+insert into english_level_c(value,label) values('Advanced','Advanced');
+
+create table occupation_c(
+    id serial primary key,
+    value varchar(200) not null unique,
+    label varchar(200)
+);
+
+insert into occupation_c(value,label) values('Employee','Employee');
+insert into occupation_c(value,label) values('Student','Student');
+insert into occupation_c(value,label) values('SelfEmployed','SelfEmployed');
+insert into occupation_c(value,label) values('NoOccupation','NoOccupation');
+
+create table field_of_work_c(
+    id serial primary key,
+    value varchar(200) not null unique,
+    label varchar(200)
+);
+
+insert into field_of_work_c(value,label) values('Business/Management','Business/Management');
+insert into field_of_work_c(value,label) values('Customer Support/Call Center','Customer
+Support/Call Center');
+insert into field_of_work_c(value,label) values('Law','Law');
+insert into field_of_work_c(value,label) values('Education/Training','Education/Training');
+insert into field_of_work_c(value,label) values('Finance/Banks','Finance/Banks');
+insert into field_of_work_c(value,label) values('HR/Human Resources','HR/Human Resources');
+insert into field_of_work_c(value,label) values('It/Engineering/Technical',
+'It/Engineering/Technical');
+insert into field_of_work_c(value,label) values('Logistics/Transportation',
+'Logistics/Transportation');
+insert into field_of_work_c(value,label) values('Marketing/Advertising/PR',
+'Marketing/Advertising/PR');
+insert into field_of_work_c(value,label) values('Medical/Health','Medical/Health');
+insert into field_of_work_c(value,label) values('Production','Production');
+insert into field_of_work_c(value,label) values('Services/Sales','Services/Sales');
+insert into field_of_work_c(value,label) values('Another','Another');
+
+create table heard_from_c(
+    id serial primary key,
+    value varchar(200) not null unique,
+    label varchar(200)
+);
+
+insert into heard_from_c(value,label) values('Friends','Friends');
+insert into heard_from_c(value,label) values('Google','Google');
+insert into heard_from_c(value,label) values('Facebook','Facebook');
+insert into heard_from_c(value,label) values('Newspaper','Newspaper');
+
+create table users (
+    id uuid primary key,
+    email character varying(200) unique not null,
+    first_name character varying(200) not null,
+    last_name character varying(200) not null,
+    birthday timestamp not null,
+    city character varying(200) not null,
+    phone character varying(200) not null,
+    occupation smallint not null references occupation_c(id),
+    field_of_work smallint not null references field_of_work_c(id),
+    english_level smallint not null references english_level_c(id),
+    it_experience boolean not null,
+    experience_description text,
+    heard_from smallint not null references heard_from_c(id) ,
+    created timestamptz not null default now(),
+    updated timestamptz not null default now()
+);
+
+create trigger set_timestamp_users
+before update on users
+for each row execute procedure set_update_date();
