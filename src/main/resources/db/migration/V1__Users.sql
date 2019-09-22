@@ -50,31 +50,20 @@ insert into field_of_work_c(value,label) values('Production','Production');
 insert into field_of_work_c(value,label) values('Services/Sales','Services/Sales');
 insert into field_of_work_c(value,label) values('Another','Another');
 
-create table heard_from_c(
-    id serial primary key,
-    value varchar(200) not null unique,
-    label varchar(200)
-);
-
-insert into heard_from_c(value,label) values('Friends','Friends');
-insert into heard_from_c(value,label) values('Google','Google');
-insert into heard_from_c(value,label) values('Facebook','Facebook');
-insert into heard_from_c(value,label) values('Newspaper','Newspaper');
-
 create table users (
     id uuid primary key,
-    email character varying(200) unique not null,
-    first_name character varying(200) not null,
-    last_name character varying(200) not null,
+    email varchar(200) unique not null,
+    first_name varchar(200) not null,
+    last_name varchar(200) not null,
     birthday timestamp not null,
-    city character varying(200) not null,
-    phone character varying(200) not null,
+    city varchar(200) not null,
+    phone varchar(200) not null,
     occupation smallint not null references occupation_c(id),
     field_of_work smallint not null references field_of_work_c(id),
     english_level smallint not null references english_level_c(id),
     it_experience boolean not null,
     experience_description text,
-    heard_from smallint not null references heard_from_c(id) ,
+    heard_from varchar(200) not null references heard_from_c(id) ,
     created timestamptz not null default now(),
     updated timestamptz not null default now()
 );

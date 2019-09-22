@@ -14,15 +14,15 @@ case class User(
   birthday: String,
   city: DbString,
   phone: DbString,
-  occupation: ComboId,
-  fieldOfWork: ComboId,
-  englishLevel: ComboId,
-  itExperience: ComboId,
+  occupation: Short,
+  fieldOfWork: Short,
+  englishLevel: Short,
+  itExperience: Boolean,
   experienceDescription: Option[String],
-  heardFrom: ComboId)
+  heardFrom: String)
 
 /*
 { "email":"test@exmaple.com", "firstName":"John", "lastName":"Popescu", "birthday":"1980/31/21",
 "city":"Iasi", "phone":"+40742012378", "occupation":5, "fieldOfWork":4, "englishLevel":3,
-"itExperience":2, "heardFrom":1 }
+"itExperience":2, "heardFrom":"Facebook" }
  */

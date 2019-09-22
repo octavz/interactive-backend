@@ -6,10 +6,8 @@ import doobie._
 import doobie.implicits._
 import zio._
 import zio.interop.catz._
-import eu.timepit.refined._
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.boolean._
 import eu.timepit.refined.types.string._
+import io.circe.generic.JsonCodec
 
 package object db {
   sealed trait DatabaseError
@@ -18,8 +16,8 @@ package object db {
 
   type DbString = NonEmptyString //And FiniteString[W.`200`.T]
 
-  case class Id(value: UUID) extends AnyVal
-  case class ComboId(value: Short) extends AnyVal
+  type Id = UUID
+  type ComboId = Short
 
   sealed trait Combos
   case object Occupation

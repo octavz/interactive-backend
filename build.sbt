@@ -10,7 +10,7 @@ lazy val Versions = new {
   val jsonIgniter = "0.55.2"
   val pureconfig = "0.12.0"
   val refined = "0.9.10"
-  val circe = "0.12.1"
+  val circe = "0.11.1"
 }
 
 ThisBuild / scalaVersion              := "2.12.10"

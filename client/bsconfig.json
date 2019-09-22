@@ -16,11 +16,10 @@
   "namespace": true,
   "bs-dependencies": [
     "reason-react",
+    "@glennsl/bs-json",
     "@ahrefs/bs-reactstrap",
     "bs-fetch",
-    "bs-abstract",
-    "@ryb73/decco"
+    "bs-abstract"
   ],
-  "ppx-flags": [ "@ryb73/decco/ppx/ppx_decco.sh" ],
   "refmt": 3
 }
