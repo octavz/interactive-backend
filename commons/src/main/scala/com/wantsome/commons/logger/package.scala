@@ -1,31 +1,32 @@
 package com.wantsome
 
-import com.wantsome.commons.logger.Logger
-import zio.ZIO
+package commons
 
-package object commons {
-  def error(message: => String): ZIO[Logger, Error, Unit] = ZIO.accessM[Logger](_.logger.error(message))
+import zio._
 
-  def warn(message: => String): ZIO[Logger, Error, Unit] = ZIO.accessM[Logger](_.logger.warn(message))
+package object logger {
+  def error(message: => String): URIO[Logger, Unit] = ZIO.accessM[Logger](_.logger.error(message))
 
-  def info(message: => String): ZIO[Logger, Error, Unit] = ZIO.accessM[Logger](_.logger.info(message))
+  def warn(message: => String): URIO[Logger, Unit] = ZIO.accessM[Logger](_.logger.warn(message))
 
-  def debug(message: => String): ZIO[Logger, Error, Unit] = ZIO.accessM[Logger](_.logger.debug(message))
+  def info(message: => String): URIO[Logger, Unit] = ZIO.accessM[Logger](_.logger.info(message))
 
-  def trace(message: => String): ZIO[Logger, Error, Unit] = ZIO.accessM[Logger](_.logger.trace(message))
+  def debug(message: => String): URIO[Logger, Unit] = ZIO.accessM[Logger](_.logger.debug(message))
 
-  def error(t: Throwable)(message: => String): ZIO[Logger, Error, Unit] =
+  def trace(message: => String): URIO[Logger, Unit] = ZIO.accessM[Logger](_.logger.trace(message))
+
+  def error(t: Throwable)(message: => String): URIO[Logger, Unit] =
     ZIO.accessM[Logger](_.logger.error(t)(message))
 
-  def warn(t: Throwable)(message: => String): ZIO[Logger, Error, Unit] =
+  def warn(t: Throwable)(message: => String): URIO[Logger, Unit] =
     ZIO.accessM[Logger](_.logger.warn(t)(message))
 
-  def info(t: Throwable)(message: => String): ZIO[Logger, Error, Unit] =
+  def info(t: Throwable)(message: => String): URIO[Logger, Unit] =
     ZIO.accessM[Logger](_.logger.info(t)(message))
 
-  def debug(t: Throwable)(message: => String): ZIO[Logger, Error, Unit] =
+  def debug(t: Throwable)(message: => String): URIO[Logger, Unit] =
     ZIO.accessM[Logger](_.logger.debug(t)(message))
 
-  def trace(t: Throwable)(message: => String): ZIO[Logger, Error, Unit] =
+  def trace(t: Throwable)(message: => String): URIO[Logger, Unit] =
     ZIO.accessM[Logger](_.logger.trace(t)(message))
 }

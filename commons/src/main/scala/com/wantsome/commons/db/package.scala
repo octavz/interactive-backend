@@ -1,37 +1,22 @@
-package com.wantsome.commons
+package com.wantsome
 
-import java.util.UUID
+package commons
 
 import doobie._
 import doobie.implicits._
 import zio._
 import zio.interop.catz._
-import eu.timepit.refined.types.string._
-import io.circe.generic.JsonCodec
 
 package object db {
-  sealed trait DatabaseError
-  final case class DatabaseThrowable(t: Throwable) extends DatabaseError
+
+  sealed trait DatabaseError extends Throwable
   case object InsertFailed extends DatabaseError
 
-  type DbString = NonEmptyString //And FiniteString[W.`200`.T]
+  def transactor[R <: TransactorProvider]: ZIO[R, Nothing, Transactor[Task]] =
+    ZIO.access[R](_.transactor())
 
-  type Id = UUID
-  type ComboId = Short
-
-  sealed trait Combos
-  case object Occupation
-  case object FieldOfWork
-  case object EnglishLevel
-  case object HeardFrom
-
-  case class Combo(id: ComboId, value: DbString, label: DbString)
-
-  def transactor[R <: TransactorProvider] =
-    ZIO.accessM[R](_.transactor())
-
-  def runDb[R <: TransactorProvider, A](trans: => ConnectionIO[A]): ZIO[R, DatabaseError, A] =
-    transactor[R] >>= (trans.transact(_).mapError(DatabaseThrowable))
+  def runDb[R <: TransactorProvider, A](trans: => ConnectionIO[A]): RIO[R, A] =
+    transactor[R] >>= (trans.transact(_))
   /*
   def appConfig[R <: SettingsProvider]: RIO[R, AppConfig] =
     ZIO.accessM[R](_.settings())

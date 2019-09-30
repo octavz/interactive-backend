@@ -1,8 +1,4 @@
-package com.wantsome
-
-package commons
-
-package models
+package com.wantsome.commons
 
 import cats.data.{IndexedState, IndexedStateT}
 import cats.{Applicative, Eval}

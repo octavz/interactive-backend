@@ -34,3 +34,15 @@ object TransactorBuilder {
     ZManaged(res)
   }
 }
+
+object TransactorProvider {
+
+  trait Service {
+    def apply(): Transactor[Task]
+  }
+
+}
+
+trait TransactorProvider {
+  val transactor: TransactorProvider.Service
+}
