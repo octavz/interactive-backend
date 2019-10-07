@@ -33,8 +33,8 @@ create table field_of_work_c(
 );
 
 insert into field_of_work_c(value,label) values('Business/Management','Business/Management');
-insert into field_of_work_c(value,label) values('Customer Support/Call Center','Customer
-Support/Call Center');
+insert into field_of_work_c(value,label) values(
+    'Customer Support/Call Center','Customer Support/Call Center');
 insert into field_of_work_c(value,label) values('Law','Law');
 insert into field_of_work_c(value,label) values('Education/Training','Education/Training');
 insert into field_of_work_c(value,label) values('Finance/Banks','Finance/Banks');
@@ -63,7 +63,7 @@ create table users (
     english_level smallint not null references english_level_c(id),
     it_experience boolean not null,
     experience_description text,
-    heard_from varchar(200) not null references heard_from_c(id) ,
+    heard_from varchar(200) not null,
     created timestamptz not null default now(),
     updated timestamptz not null default now()
 );

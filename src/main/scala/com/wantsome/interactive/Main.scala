@@ -5,62 +5,72 @@ package interactive
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.{Http, Service}
 import com.twitter.util.Await
-import com.wantsome.commons.config.{LiveSettingsProvider, SettingsProvider}
-import com.wantsome.commons.db.TransactorProvider
-import com.wantsome.commons.logger.LiveLogger
-import com.wantsome.verifyr.auth.models.{EnglishLevel, FieldOfWork, Occupation}
 import io.finch._
 import io.finch.circe.dropNullValues._
-import zio._
+import cats.effect.ConcurrentEffect
+import cats.effect.IO
+import zio.{IO => _, _}
 import zio.interop.catz._
-import io.circe._
+import zio.blocking.Blocking
 import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.refined._
-import models._
-import commons.logger._
-import doobie.util.transactor
 import doobie.util.transactor.Transactor
+import com.github.mlangc.slf4zio.api._
+import commons.config.{AppConfig, LiveSettingsProvider, SettingsProvider}
+import commons.db.{migration, TransactorProvider}
 import verifyr.auth._
-import zio.blocking.Blocking
+import verifyr.auth.models.{EnglishLevel, FieldOfWork, Occupation}
+import models._
+import json._
 
-object Main extends App with EndpointModule[Task] {
-  import json._
-  implicit val runtime = new DefaultRuntime {}
+object Main extends zio.App with Endpoint.Module[cats.effect.IO] with LoggingSupport {
+  implicit val runtime: DefaultRuntime = new DefaultRuntime {}
 
-  trait Env extends SettingsProvider with LiveAuth with LiveRepo with LiveLogger with TransactorProvider
+  trait Env extends SettingsProvider with LiveAuth with LiveRepo with TransactorProvider
 
-  def healthcheck: Endpoint[Task, String] = get(pathEmpty) {
-    ZIO.succeed("ok").map(Ok): Task[Output[String]]
+  implicit class ToIO[A](val zio: Task[A]) extends AnyVal {
+    def toIO: IO[A] = ConcurrentEffect.toIOFromRunCancelable(zio)
   }
 
-  def helloWorld: Endpoint[Task, UserDTO] = get("hello") {
+  def healthcheck: Endpoint[IO, String] = get(pathEmpty) {
+    ZIO.succeed("ok").map(Ok).toIO
+  }
+
+  def helloWorld: Endpoint[IO, UserDTO] = get("hello") {
     val rawJson = """
                     |{ "email":"test@exmaple.com", "firstName":"John", "lastName":"Popescu",
                     |"birthday":"1980/31/21", "city":"Iasi", "phone":"+40742012378", "occupation":5,
                     |"fieldOfWork":4, "englishLevel":3,"itExperience":2, "heardFrom":1 }""".stripMargin
     val user = parse(rawJson).fold(ZIO.fail, _.as[UserDTO].fold(ZIO.fail, ZIO.succeed))
-    user.map(Ok): Task[Output[UserDTO]]
+    user.map(Ok).toIO
   }
 
-  def combos(env: Env): Endpoint[Task, CombosDTO] = get("combos") {
-    val res: RIO[Env, CombosDTO] = service.combos.map { dic =>
+  def combos(env: Env): Endpoint[IO, CombosDTO] = get("combos") {
+    service.combos.map { dic =>
       CombosDTO(
         englishLevel = dic(EnglishLevel).values,
         occupation = dic(Occupation).values,
         fieldOfWork = dic(FieldOfWork).values)
+    }.provide(env).map(Ok).toIO
+  }
+
+  def hello: Endpoint[IO, String] = get("hello" :: path[String]) { s: String =>
+    Task.succeed(Ok(s)).toIO
+  }
+
+  private lazy val s = new LiveSettingsProvider {}
+
+  private def migrate: Task[Int] =
+    s.settingsProvider.config >>= { c =>
+      migration.migrate(
+        schema = c.database.schema.value,
+        jdbcUrl = c.database.url.value,
+        user = c.database.user.value,
+        password = c.database.password.value)
     }
-    res.provide(env).map(Ok): Task[Output[CombosDTO]]
-  }
 
-  /*
-  def hello: Endpoint[IO, Message] = get("hello" :: path[String]) { s: String =>
-    Ok(Message(s))
-  }
-   */
-
-  def httpService: Task[Service[Request, Response]] = {
-    val s = new LiveSettingsProvider {}
+  def httpService: Task[Service[Request, Response]] =
     s.settingsProvider
       .transactor(Platform.executor.asEC)
       .use { xa =>
@@ -70,21 +80,21 @@ object Main extends App with EndpointModule[Task] {
           }
           override val settingsProvider: SettingsProvider.Service = s.settingsProvider
         }
-
         ZIO.succeed(
           Bootstrap
             .serve[Text.Plain](healthcheck)
-            .serve[Application.Json]( /*helloWorld :+: */ combos(env))
-            .serve[Application.Json](helloWorld)
+            .serve[Application.Json](helloWorld :+: hello)
             .toService)
       }
       .provide(Blocking.Live)
+
+  override def run(args: List[String]): URIO[Main.Environment, Int] = {
+    val io = for {
+      service <- httpService
+      _ <- migrate
+      ret <- ZIO.effect(Await.ready(Http.server.serve(":8081", service))) *> ZIO.never
+    } yield ret
+    io.catchAll(t => logger.errorIO("Failed in main", t).as(0))
   }
 
-  override def run(args: List[String]): URIO[Main.Environment, Int] =
-    httpService.flatMap { s =>
-      ZIO.effectTotal(Await.ready(Http.server.serve(":8081", s))) *> ZIO.never
-    }.catchAll { t =>
-      error(t)("Failed in main").provide(LiveLogger).as(0)
-    }
 }

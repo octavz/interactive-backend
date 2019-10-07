@@ -11,6 +11,7 @@ lazy val Versions = new {
   val pureconfig = "0.12.0"
   val refined = "0.9.10"
   val circe = "0.11.1"
+  val fintrospect="15.1.0"
 }
 
 ThisBuild / scalaVersion              := "2.12.10"
@@ -79,21 +80,23 @@ val testDeps = Seq(
 )
 
 val commonDeps = Seq(
-  "dev.zio" %% "zio"                      % Versions.zio,
-  "dev.zio" %% "zio-test-sbt"             % Versions.zio,
-  "dev.zio" %% "zio-interop-cats"         % Versions.zioInteropCats,
-  "ch.qos.logback"                        % "logback-classic" % Versions.logback,
-  "org.tpolecat" %% "doobie-core"         % Versions.doobie,
-  "org.tpolecat" %% "doobie-postgres"     % Versions.doobie,
-  "org.tpolecat" %% "doobie-hikari"       % Versions.doobie,
-  "org.tpolecat" %% "doobie-refined"      % Versions.doobie,
-  "com.github.pureconfig" %% "pureconfig" % Versions.pureconfig,
-  "eu.timepit" %% "refined"               % Versions.refined,
-  "eu.timepit" %% "refined-pureconfig"    % Versions.refined,
-  "io.circe" %% "circe-generic"           % Versions.circe,
-  "io.circe" %% "circe-refined"           % Versions.circe,
-  "io.circe" %% "circe-parser"            % Versions.circe,
-  "org.flywaydb"                          % "flyway-core" % "6.0.3"
+  "dev.zio"               %% "zio"                  % Versions.zio,
+  "dev.zio"               %% "zio-test-sbt"         % Versions.zio,
+  "dev.zio"               %% "zio-interop-cats"     % Versions.zioInteropCats,
+  "ch.qos.logback"        %  "logback-classic"      % Versions.logback,
+  "org.tpolecat"          %% "doobie-core"          % Versions.doobie,
+  "org.tpolecat"          %% "doobie-postgres"      % Versions.doobie,
+  "org.tpolecat"          %% "doobie-hikari"        % Versions.doobie,
+  "org.tpolecat"          %% "doobie-refined"       % Versions.doobie,
+  "com.github.pureconfig" %% "pureconfig"           % Versions.pureconfig,
+  "eu.timepit"            %% "refined"              % Versions.refined,
+  "eu.timepit"            %% "refined-pureconfig"   % Versions.refined,
+  "io.circe"              %% "circe-generic"        % Versions.circe,
+  "io.circe"              %% "circe-refined"        % Versions.circe,
+  "io.circe"              %% "circe-parser"         % Versions.circe,
+  "org.flywaydb"          %  "flyway-core"          % "6.0.3",
+  "com.github.mlangc"     %% "slf4zio"              % "0.2.1"
+
 ) ++ testDeps
 
 val testrDeps = Seq(
@@ -104,5 +107,7 @@ val verifyrDeps = Seq(
 
 val interactiveDeps = Seq(
   "com.github.finagle" %% "finchx-core"  % Versions.finch,
-  "com.github.finagle" %% "finchx-circe" % Versions.finch
+  "com.github.finagle" %% "finchx-circe" % Versions.finch,
+  "io.fintrospect" %% "fintrospect-core" % Versions.fintrospect,
+  "io.fintrospect" %% "fintrospect-circe" % Versions.fintrospect
 ) ++ commonDeps
