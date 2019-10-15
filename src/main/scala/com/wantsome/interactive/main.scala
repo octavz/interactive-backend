@@ -2,8 +2,8 @@ package com.wantsome
 
 package interactive
 
-import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.{Http, Service}
+import com.twitter.finagle.http.{Request, Response}
 import com.twitter.util.Await
 import io.finch._
 import io.finch.circe.dropNullValues._
@@ -14,11 +14,10 @@ import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.refined._
 import com.github.mlangc.slf4zio.api._
-import com.wantsome.common.config.settings
-import common.config._
-import common.db._
+
+import common._, db._, data._
 import verifyr.auth._
-import common.data._
+
 import dto._
 import implicits._
 

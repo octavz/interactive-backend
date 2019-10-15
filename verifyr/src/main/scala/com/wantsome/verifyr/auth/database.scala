@@ -10,7 +10,6 @@ import doobie.implicits._
 import doobie.refined.implicits._
 import common._
 import common.db._, utils._
-import config._
 import common.data._
 
 object Repo {

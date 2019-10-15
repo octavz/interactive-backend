@@ -4,14 +4,14 @@ package common
 
 package db
 
-import com.wantsome.common.config.DatabaseConfig
 import doobie.Transactor
 import doobie.hikari.HikariTransactor
 import eu.timepit.refined.auto._
 import zio._
 import zio.interop.catz._
-
 import scala.concurrent.ExecutionContext
+
+import com.wantsome.common.DatabaseConfig
 
 package object transactor {
 
