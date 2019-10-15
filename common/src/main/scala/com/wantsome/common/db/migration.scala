@@ -1,6 +1,6 @@
 package com.wantsome
 
-package commons
+package common
 
 package db
 import org.flywaydb.core.Flyway

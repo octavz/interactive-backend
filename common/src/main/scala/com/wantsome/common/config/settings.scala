@@ -1,10 +1,10 @@
 package com.wantsome
 
-package commons
+package common
 
 package config
 
-import com.wantsome.commons.db.TransactorBuilder
+import com.wantsome.common.db.TransactorBuilder
 import doobie.util.transactor.Transactor
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.NonEmpty
@@ -28,8 +28,7 @@ case class DatabaseConfig(
 object SettingsProvider {
 
   trait Service {
-    def config: Task[AppConfig]
-    def transactor(ec: ExecutionContext): ZManaged[Blocking, Throwable, Transactor[Task]]
+    def config: Either[Throwable, AppConfig]
   }
 }
 
@@ -39,22 +38,13 @@ trait SettingsProvider {
 
 trait LiveSettingsProviderService extends SettingsProvider.Service {
 
-  override def config: Task[AppConfig] =
-    ZIO.effect(ConfigSource.default.load[AppConfig]).flatMap {
-      case Right(value) =>
-        Task.succeed(value)
+  override def config: Either[Throwable, AppConfig] =
+    ConfigSource.default.load[AppConfig] match {
+      case Right(value) => Right(value)
       case Left(err) =>
         val errString = err.toList.map(_.description).mkString(",")
-        Task.fail(new Exception(errString))
+        Left(new Exception(errString))
     }
-
-  override def transactor(ec: ExecutionContext): ZManaged[Blocking, Throwable, Transactor[Task]] = {
-    val io = for {
-      c <- config
-      blockingEc <- ZIO.accessM[Blocking](_.blocking.blockingExecutor.map(_.asEC))
-    } yield TransactorBuilder.mkTransactor(c.database, ec, blockingEc)
-    ZManaged.unwrap(io)
-  }
 
 }
 
@@ -65,9 +55,15 @@ trait LiveSettingsProvider extends SettingsProvider {
 object settings {
 
   def config[R <: SettingsProvider]: RIO[R, AppConfig] =
-    ZIO.accessM[SettingsProvider](_.settingsProvider.config)
+    ZIO.access[SettingsProvider](_.settingsProvider.config) >>= (ZIO.fromEither(_))
 
-  def transactor[R <: Blocking with SettingsProvider](ec: ExecutionContext): ZManaged[R, Throwable, Transactor[Task]] =
-    ZManaged.unwrap(ZIO.access[R](_.settingsProvider.transactor(ec)))
+  def managedTransactor[R <: Blocking with SettingsProvider](
+    ec: ExecutionContext): ZManaged[R, Throwable, Transactor[Task]] = {
+    val io = for {
+      c <- config[SettingsProvider]
+      blockingEc <- ZIO.accessM[Blocking](_.blocking.blockingExecutor.map(_.asEC))
+    } yield TransactorBuilder.mkTransactor(c.database, ec, blockingEc)
 
+    ZManaged.unwrap(io)
+  }
 }

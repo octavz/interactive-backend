@@ -1,20 +1,15 @@
 package com.wantsome
 
-package verifyr
-
-package auth
+package interactive
 
 import java.sql.Timestamp
-import commons.models._
+import common.data._
 
-object models {
+object dto {
+  type ComboDTO = List[ComboValue]
+  case class CombosDTO(occupation: List[ComboValue], fieldOfWork: List[ComboValue], englishLevel: List[ComboValue])
 
-  sealed trait ComboType
-  case object EnglishLevel extends ComboType
-  case object Occupation extends ComboType
-  case object FieldOfWork extends ComboType
-
-  case class User(
+  case class UserDTO(
     id: Option[Id],
     email: DbString,
     firstName: DbString,

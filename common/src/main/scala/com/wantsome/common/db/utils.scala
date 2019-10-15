@@ -1,13 +1,15 @@
 package com.wantsome
 
-package commons
+package common
+
+package db
 
 import doobie._
 import doobie.implicits._
 import zio._
 import zio.interop.catz._
 
-package object db {
+object utils {
 
   sealed trait DatabaseError extends Throwable
   case object InsertFailed extends DatabaseError

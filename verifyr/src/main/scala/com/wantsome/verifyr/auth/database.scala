@@ -8,11 +8,10 @@ import com.wantsome.verifyr.auth.Repo.Env
 import zio._
 import doobie.implicits._
 import doobie.refined.implicits._
-import commons._
-import commons.db._
-import commons.models._
+import common._
+import common.db._, utils._
 import config._
-import models._
+import common.data._
 
 object Repo {
   type Env = SettingsProvider with TransactorProvider
@@ -49,7 +48,6 @@ trait LiveRepoService extends Repo.Service {
     }
     res.map(Combo)
   }
-
 }
 
 trait LiveRepo extends Repo {

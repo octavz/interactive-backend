@@ -14,7 +14,7 @@ import io.finch._
 
 
 object Main extends App {
-  import commons.finch.JsonIter._
+  import common.finch.JsonIter._
   implicit val codec: JsonValueCodec[Message] = JsonCodecMaker.make[Message](CodecMakerConfig())
 
   case class Message(hello: String)

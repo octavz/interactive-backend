@@ -1,14 +1,14 @@
 lazy val Versions = new {
-  val kindProjector = "0.10.3"
+  val kindProjector = "0.11.0"
   val scalamacros = "2.1.1"
-  val zio = "1.0.0-RC12-1"
-  val zioInteropCats = "2.0.0.0-RC3"
+  val zio = "1.0.0-RC15"
+  val zioInteropCats = "2.0.0.0-RC5"
   val randomDataGenerator = "2.7"
   val logback = "1.2.3"
-  val doobie = "0.8.2"
+  val doobie = "0.8.4"
   val finch = "0.31.0"
   val jsonIgniter = "0.55.2"
-  val pureconfig = "0.12.0"
+  val pureconfig = "0.12.1"
   val refined = "0.9.10"
   val circe = "0.11.1"
   val fintrospect="15.1.0"
@@ -20,15 +20,24 @@ ThisBuild / scalafmtOnCompile         := true
 ThisBuild / fork in Test              := true
 ThisBuild / parallelExecution in Test := true
 ThisBuild / turbo                     := true
+ThisBuild / scalacOptions             := Seq(
+  "-Ypartial-unification",
+  "-Ywarn-unused-import",
+  "-Ywarn-unused",
+  "-Ywarn-numeric-widen",
+  "-deprecation",
+  "-Yno-adapted-args",
+  "-Ywarn-value-discard",
+  "-Xfatal-warnings"
+)
 ThisBuild / onChangedBuildSource      := ReloadOnSourceChanges
 
-lazy val commons = (project in file("commons"))
+lazy val common = (project in file("common"))
   .configs(IntegrationTest)
+  .settings(resolvers += Resolver.sonatypeRepo("releases"))
   .settings(
     libraryDependencies ++= commonDeps,
-    name := "commons",
-    addCompilerPlugin("org.typelevel" %% "kind-projector" % Versions.kindProjector),
-    addCompilerPlugin("org.scalamacros" %% "paradise"     % Versions.scalamacros cross CrossVersion.full)
+    name := "common"
   )
 
 lazy val testr = (project in file("testr"))
@@ -36,22 +45,18 @@ lazy val testr = (project in file("testr"))
   .settings(
     name := "testr",
     libraryDependencies ++= testrDeps,
-    Defaults.itSettings,
-    addCompilerPlugin("org.typelevel" %% "kind-projector" % Versions.kindProjector),
-    addCompilerPlugin("org.scalamacros" %% "paradise"     % Versions.scalamacros cross CrossVersion.full)
+    Defaults.itSettings
   )
-  .dependsOn(commons)
+  .dependsOn(common)
 
 lazy val verifyr = (project in file("verifyr"))
   .configs(IntegrationTest)
   .settings(
     name := "verifyr",
     libraryDependencies ++= verifyrDeps,
-    Defaults.itSettings,
-    addCompilerPlugin("org.typelevel" %% "kind-projector" % Versions.kindProjector),
-    addCompilerPlugin("org.scalamacros" %% "paradise"     % Versions.scalamacros cross CrossVersion.full)
+    Defaults.itSettings
   )
-  .dependsOn(commons)
+  .dependsOn(common)
   .settings(testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")))
 
 enablePlugins(FlywayPlugin)
@@ -66,7 +71,10 @@ lazy val root = (project in file("."))
     flywayLocations += "db/migration",
     flywaySchemas := Seq("interactive"),
     libraryDependencies ++= interactiveDeps,
-    testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
+    testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
+    addCompilerPlugin("org.typelevel" %% "kind-projector" % Versions.kindProjector cross CrossVersion.full),
+    addCompilerPlugin("org.scalamacros" %% "paradise"     % Versions.scalamacros cross CrossVersion.full),
+    addCompilerPlugin ("com.olegpy" %% "better-monadic-for" % "0.3.1")
   )
   .settings(Defaults.itSettings)
   .dependsOn(verifyr, testr)
@@ -75,8 +83,8 @@ lazy val root = (project in file("."))
 val testDeps = Seq(
   "dev.zio" %% "zio-test"                          % Versions.zio                 % "test,it",
   "com.danielasfregola" %% "random-data-generator" % Versions.randomDataGenerator % "test,it",
-  "com.dimafeng" %% "testcontainers-scala"         % "0.32.0"                     % "test,it",
-  "org.testcontainers"                             % "postgresql"                 % "1.12.1" % "test,it"
+  "com.dimafeng" %% "testcontainers-scala"         % "0.33.0"                     % "test,it",
+  "org.testcontainers"                             % "postgresql"                 % "1.12.2" % "test,it"
 )
 
 val commonDeps = Seq(
@@ -94,8 +102,8 @@ val commonDeps = Seq(
   "io.circe"              %% "circe-generic"        % Versions.circe,
   "io.circe"              %% "circe-refined"        % Versions.circe,
   "io.circe"              %% "circe-parser"         % Versions.circe,
-  "org.flywaydb"          %  "flyway-core"          % "6.0.3",
-  "com.github.mlangc"     %% "slf4zio"              % "0.2.1"
+  "org.flywaydb"          %  "flyway-core"          % "6.0.6",
+  "com.github.mlangc"     %% "slf4zio"              % "0.3.0"
 
 ) ++ testDeps
 
@@ -108,6 +116,5 @@ val verifyrDeps = Seq(
 val interactiveDeps = Seq(
   "com.github.finagle" %% "finchx-core"  % Versions.finch,
   "com.github.finagle" %% "finchx-circe" % Versions.finch,
-  "io.fintrospect" %% "fintrospect-core" % Versions.fintrospect,
-  "io.fintrospect" %% "fintrospect-circe" % Versions.fintrospect
+  "org.typelevel" %% "cats-effect" % "2.0.0"
 ) ++ commonDeps

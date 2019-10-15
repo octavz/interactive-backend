@@ -7,62 +7,61 @@ import com.twitter.finagle.{Http, Service}
 import com.twitter.util.Await
 import io.finch._
 import io.finch.circe.dropNullValues._
-import cats.effect.ConcurrentEffect
-import cats.effect.IO
 import zio.{IO => _, _}
 import zio.interop.catz._
 import zio.blocking.Blocking
 import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.refined._
-import doobie.util.transactor.Transactor
 import com.github.mlangc.slf4zio.api._
-import commons.config.{AppConfig, LiveSettingsProvider, SettingsProvider}
-import commons.db.{migration, TransactorProvider}
+import com.wantsome.common.config.settings
+import common.config._
+import common.db._
 import verifyr.auth._
-import verifyr.auth.models.{EnglishLevel, FieldOfWork, Occupation}
-import models._
-import json._
+import common.data._
+import dto._
+import implicits._
 
-object Main extends zio.App with Endpoint.Module[cats.effect.IO] with LoggingSupport {
-  implicit val runtime: DefaultRuntime = new DefaultRuntime {}
+object liveEnv extends LiveSettingsProvider with LiveAuth with LiveRepo with Blocking.Live
+trait Env extends SettingsProvider with Auth with Repo with TransactorProvider
 
-  trait Env extends SettingsProvider with LiveAuth with LiveRepo with TransactorProvider
+object Main extends zio.App with Endpoint.Module[RIO[Env, *]] with LoggingSupport {
 
-  implicit class ToIO[A](val zio: Task[A]) extends AnyVal {
-    def toIO: IO[A] = ConcurrentEffect.toIOFromRunCancelable(zio)
+  type AppS[A] = RIO[Env, A]
+
+  def healthcheck: Endpoint[AppS, String] = get(pathEmpty) {
+    ZIO.succeed("ok").map(Ok): AppS[Output[String]]
   }
 
-  def healthcheck: Endpoint[IO, String] = get(pathEmpty) {
-    ZIO.succeed("ok").map(Ok).toIO
-  }
-
-  def helloWorld: Endpoint[IO, UserDTO] = get("hello") {
+  def helloWorld: Endpoint[AppS, UserDTO] = get("hello") {
     val rawJson = """
                     |{ "email":"test@exmaple.com", "firstName":"John", "lastName":"Popescu",
-                    |"birthday":"1980/31/21", "city":"Iasi", "phone":"+40742012378", "occupation":5,
-                    |"fieldOfWork":4, "englishLevel":3,"itExperience":2, "heardFrom":1 }""".stripMargin
+                    |"birthday":"1570982164", "city":"Iasi", "phone":"+40742012378", "occupation":"5",
+                    |"fieldOfWork":"4", "englishLevel":"3","itExperience":true, "heardFrom":"1" }""".stripMargin
     val user = parse(rawJson).fold(ZIO.fail, _.as[UserDTO].fold(ZIO.fail, ZIO.succeed))
-    user.map(Ok).toIO
+    user.map(Ok): AppS[Output[UserDTO]]
   }
 
-  def combos(env: Env): Endpoint[IO, CombosDTO] = get("combos") {
+  def combos: Endpoint[AppS, CombosDTO] = get("combos") {
     service.combos.map { dic =>
       CombosDTO(
         englishLevel = dic(EnglishLevel).values,
         occupation = dic(Occupation).values,
         fieldOfWork = dic(FieldOfWork).values)
-    }.provide(env).map(Ok).toIO
+    }.map(Ok): AppS[Output[CombosDTO]]
   }
 
-  def hello: Endpoint[IO, String] = get("hello" :: path[String]) { s: String =>
-    Task.succeed(Ok(s)).toIO
+  def hello: Endpoint[AppS, String] = get("hello" :: path[String]) { s: String =>
+    Task
+      .fail(new Exception(s))
+      .map(v => Ok(v))
+      .catchSome {
+        case t: Exception => ZIO.succeed(InternalServerError(t))
+      }: AppS[Output[String]]
   }
 
-  private lazy val s = new LiveSettingsProvider {}
-
-  private def migrate: Task[Int] =
-    s.settingsProvider.config >>= { c =>
+  private def migrate[R <: SettingsProvider]: RIO[R, Int] =
+    settings.config[SettingsProvider] >>= { c =>
       migration.migrate(
         schema = c.database.schema.value,
         jdbcUrl = c.database.url.value,
@@ -70,31 +69,36 @@ object Main extends zio.App with Endpoint.Module[cats.effect.IO] with LoggingSup
         password = c.database.password.value)
     }
 
-  def httpService: Task[Service[Request, Response]] =
-    s.settingsProvider
-      .transactor(Platform.executor.asEC)
-      .use { xa =>
-        val env = new Env {
-          override val transactor: TransactorProvider.Service = new TransactorProvider.Service {
-            override def apply(): Transactor[Task] = xa
-          }
-          override val settingsProvider: SettingsProvider.Service = s.settingsProvider
-        }
-        ZIO.succeed(
-          Bootstrap
-            .serve[Text.Plain](healthcheck)
-            .serve[Application.Json](helloWorld :+: hello)
-            .toService)
-      }
-      .provide(Blocking.Live)
+  def httpService(implicit r: Runtime[Env]): AppS[Service[Request, Response]] =
+    ZIO.effect(
+      Bootstrap
+        .serve[Text.Plain](healthcheck)
+        .serve[Application.Json](helloWorld :+: combos :+: hello)
+        .toService)
 
-  override def run(args: List[String]): URIO[Main.Environment, Int] = {
+  override def run(args: List[String]) = {
+    val managedTransactor =
+      settings
+        .managedTransactor(Platform.executor.asEC)
+        .provide(liveEnv)
+
     val io = for {
-      service <- httpService
       _ <- migrate
-      ret <- ZIO.effect(Await.ready(Http.server.serve(":8081", service))) *> ZIO.never
-    } yield ret
-    io.catchAll(t => logger.errorIO("Failed in main", t).as(0))
+      service <- managedTransactor.use { t =>
+        ZIO
+          .runtime[Env]
+          .flatMap(implicit runtime => httpService)
+          .provideSome[SettingsProvider with Repo with Auth] { e =>
+            new Env {
+              override val transactor = () => t
+              override def userRepo = e.userRepo
+              override val auth = e.auth
+              override val settingsProvider = e.settingsProvider
+            }
+          }
+      }
+      _ <- ZIO.effect(Await.ready(Http.server.serve(":8081", service))) *> ZIO.never
+    } yield ()
+    io.provide(liveEnv).foldM(t => logger.errorIO("Failed in main", t).as(0), _ => ZIO.succeed(1))
   }
-
 }

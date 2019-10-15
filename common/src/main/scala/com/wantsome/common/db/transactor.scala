@@ -1,6 +1,6 @@
-package com.wantsome.commons.db
+package com.wantsome.common.db
 
-import com.wantsome.commons.config.DatabaseConfig
+import com.wantsome.common.config.DatabaseConfig
 import doobie.Transactor
 import doobie.hikari.HikariTransactor
 import eu.timepit.refined.auto._

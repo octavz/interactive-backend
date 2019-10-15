@@ -1,4 +1,4 @@
-package com.wantsome.commons
+package com.wantsome.common
 
 import org.scalatest._
 

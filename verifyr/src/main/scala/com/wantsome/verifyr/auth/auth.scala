@@ -5,8 +5,7 @@ package verifyr
 package auth
 
 import zio._
-import models._
-import commons.models.Combo
+import common.data._
 
 trait Auth {
   val auth: Auth.Service
@@ -22,7 +21,6 @@ object Auth {
 }
 
 trait AuthLiveService extends Auth.Service {
-
   import database._
 
   override def registerUser(user: User): RIO[Auth.Env, User] =
