@@ -4,7 +4,6 @@ package common
 
 package config
 
-import com.wantsome.common.db.TransactorBuilder
 import doobie.util.transactor.Transactor
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.NonEmpty
@@ -15,6 +14,7 @@ import pureconfig.generic.auto._
 import eu.timepit.refined.pureconfig._
 
 import scala.concurrent.ExecutionContext
+import common.db._
 
 case class AppConfig(database: DatabaseConfig)
 
@@ -62,7 +62,7 @@ object settings {
     val io = for {
       c <- config[SettingsProvider]
       blockingEc <- ZIO.accessM[Blocking](_.blocking.blockingExecutor.map(_.asEC))
-    } yield TransactorBuilder.mkTransactor(c.database, ec, blockingEc)
+    } yield transactor.mkTransactor(c.database, ec, blockingEc)
 
     ZManaged.unwrap(io)
   }

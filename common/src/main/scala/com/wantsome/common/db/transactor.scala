@@ -1,4 +1,8 @@
-package com.wantsome.common.db
+package com.wantsome
+
+package common
+
+package db
 
 import com.wantsome.common.config.DatabaseConfig
 import doobie.Transactor
@@ -9,7 +13,7 @@ import zio.interop.catz._
 
 import scala.concurrent.ExecutionContext
 
-object TransactorBuilder {
+package object transactor {
 
   def mkTransactor(
     config: DatabaseConfig,
@@ -33,16 +37,4 @@ object TransactorBuilder {
     }.uninterruptible
     ZManaged(res)
   }
-}
-
-object TransactorProvider {
-
-  trait Service {
-    def apply(): Transactor[Task]
-  }
-
-}
-
-trait TransactorProvider {
-  val transactor: TransactorProvider.Service
 }

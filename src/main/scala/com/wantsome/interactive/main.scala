@@ -25,7 +25,7 @@ import implicits._
 object liveEnv extends LiveSettingsProvider with LiveAuth with LiveRepo with Blocking.Live
 trait Env extends SettingsProvider with Auth with Repo with TransactorProvider
 
-object Main extends zio.App with Endpoint.Module[RIO[Env, *]] with LoggingSupport {
+object main extends zio.App with Endpoint.Module[RIO[Env, *]] with LoggingSupport {
 
   type AppS[A] = RIO[Env, A]
 
