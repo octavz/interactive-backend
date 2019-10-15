@@ -2,8 +2,6 @@ package com.wantsome
 
 package common
 
-package db
-
 import doobie.Transactor
 import zio._
 
