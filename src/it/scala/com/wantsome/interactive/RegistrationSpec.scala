@@ -34,7 +34,7 @@ object UserRepoSpec
             uuid <- ZIO.effect(java.util.UUID.randomUUID().toString)
             r <- migration.migrate(schema = uuid, jdbcUrl = c.getJdbcUrl)
           } yield assert(r, equalTo(1))
-        },
+        } ,
         testM("correctly saves the user second time") {
           for {
             c <- ZIO.access[PostgreSQLContainer](_.container)

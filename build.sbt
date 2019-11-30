@@ -1,17 +1,18 @@
 lazy val Versions = new {
   val kindProjector = "0.11.0"
   val scalamacros = "2.1.1"
-  val zio = "1.0.0-RC15"
-  val zioInteropCats = "2.0.0.0-RC5"
-  val randomDataGenerator = "2.7"
+  val zio = "1.0.0-RC16"
+  val zioInteropCats = "2.0.0.0-RC7"
+  val randomDataGenerator = "2.8"
   val logback = "1.2.3"
-  val doobie = "0.8.4"
+  val doobie = "0.8.6"
   val finch = "0.31.0"
   val jsonIgniter = "0.55.2"
   val pureconfig = "0.12.1"
   val refined = "0.9.10"
-  val circe = "0.11.1"
+  val circe = "0.11.2"
   val fintrospect="15.1.0"
+  val tapir="0.12.3"
 }
 
 ThisBuild / scalaVersion              := "2.12.10"
@@ -27,8 +28,8 @@ ThisBuild / scalacOptions             := Seq(
   "-Ywarn-numeric-widen",
   "-deprecation",
   "-Yno-adapted-args",
-  "-Ywarn-value-discard",
-  "-Xfatal-warnings"
+  "-Ywarn-value-discard"
+  //"-Xfatal-warnings"
 )
 ThisBuild / onChangedBuildSource      := ReloadOnSourceChanges
 
@@ -84,27 +85,33 @@ val testDeps = Seq(
   "dev.zio" %% "zio-test"                          % Versions.zio                 % "test,it",
   "com.danielasfregola" %% "random-data-generator" % Versions.randomDataGenerator % "test,it",
   "com.dimafeng" %% "testcontainers-scala"         % "0.33.0"                     % "test,it",
-  "org.testcontainers"                             % "postgresql"                 % "1.12.2" % "test,it"
+  "org.testcontainers"                             % "postgresql"                 % "1.12.3" % "test,it"
 )
 
 val commonDeps = Seq(
-  "dev.zio"               %% "zio"                  % Versions.zio,
-  "dev.zio"               %% "zio-test-sbt"         % Versions.zio,
-  "dev.zio"               %% "zio-interop-cats"     % Versions.zioInteropCats,
-  "ch.qos.logback"        %  "logback-classic"      % Versions.logback,
-  "org.tpolecat"          %% "doobie-core"          % Versions.doobie,
-  "org.tpolecat"          %% "doobie-postgres"      % Versions.doobie,
-  "org.tpolecat"          %% "doobie-hikari"        % Versions.doobie,
-  "org.tpolecat"          %% "doobie-refined"       % Versions.doobie,
-  "com.github.pureconfig" %% "pureconfig"           % Versions.pureconfig,
-  "eu.timepit"            %% "refined"              % Versions.refined,
-  "eu.timepit"            %% "refined-pureconfig"   % Versions.refined,
-  "io.circe"              %% "circe-generic"        % Versions.circe,
-  "io.circe"              %% "circe-refined"        % Versions.circe,
-  "io.circe"              %% "circe-parser"         % Versions.circe,
-  "org.flywaydb"          %  "flyway-core"          % "6.0.6",
-  "com.github.mlangc"     %% "slf4zio"              % "0.3.0"
-
+  "dev.zio"                     %% "zio"                      % Versions.zio,
+  "dev.zio"                     %% "zio-test-sbt"             % Versions.zio,
+  "dev.zio"                     %% "zio-interop-cats"         % Versions.zioInteropCats,
+  "ch.qos.logback"              %  "logback-classic"          % Versions.logback,
+  "org.tpolecat"                %% "doobie-core"              % Versions.doobie,
+  "org.tpolecat"                %% "doobie-postgres"          % Versions.doobie,
+  "org.tpolecat"                %% "doobie-hikari"            % Versions.doobie,
+  "org.tpolecat"                %% "doobie-refined"           % Versions.doobie,
+  "com.github.pureconfig"       %% "pureconfig"               % Versions.pureconfig,
+  "eu.timepit"                  %% "refined"                  % Versions.refined,
+  "eu.timepit"                  %% "refined-pureconfig"       % Versions.refined,
+  "io.circe"                    %% "circe-generic"            % Versions.circe,
+  "io.circe"                    %% "circe-refined"            % Versions.circe,
+  "io.circe"                    %% "circe-parser"             % Versions.circe,
+  "org.flywaydb"                %  "flyway-core"              % "6.0.8",
+  "com.github.mlangc"           %% "slf4zio"                  % "0.3.0",
+  "com.softwaremill.sttp.tapir" %% "tapir-core"               % Versions.tapir,
+  "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"      % Versions.tapir,
+  "com.softwaremill.sttp.tapir" %% "tapir-json-circe"         % Versions.tapir,
+  "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-http4s"  % Versions.tapir,
+  "com.softwaremill.sttp.tapir" %% "tapir-redoc-http4s"       % Versions.tapir,
+  "com.softwaremill.sttp.tapir" %% "tapir-openapi-docs"       % Versions.tapir,
+  "com.softwaremill.sttp.tapir" %% "tapir-openapi-circe-yaml" % Versions.tapir
 ) ++ testDeps
 
 val testrDeps = Seq(
