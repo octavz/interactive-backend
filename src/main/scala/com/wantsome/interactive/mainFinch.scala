@@ -21,7 +21,7 @@ import implicits._
 
 trait FinchEnv extends SettingsProvider with Auth with Repo with TransactorProvider
 
-object mainFinch extends zio.App with Endpoint.Module[RIO[FinchEnv, *]] with LoggingSupport {
+object mainFinch extends Endpoint.Module[RIO[FinchEnv, *]] with LoggingSupport with DefaultRuntime {
   object liveEnv extends LiveSettingsProvider with LiveAuth with LiveRepo with Blocking.Live
 
   type AppS[A] = RIO[FinchEnv, A]
@@ -73,14 +73,14 @@ object mainFinch extends zio.App with Endpoint.Module[RIO[FinchEnv, *]] with Log
         .serve[Application.Json](helloWorld :+: combos :+: hello)
         .toService)
 
-  override def run(args: List[String]) = {
+  def run(args: List[String]) = {
     val managedTransactor =
       settings
-        .managedTransactor(Platform.executor.asEC)
+        .managedTransactor(platform.executor.asEC)
         .provide(liveEnv)
 
     val io = for {
-      _ <- migrate
+      _ <- migrate[SettingsProvider]
       service <- managedTransactor.use { t =>
         ZIO
           .runtime[FinchEnv]

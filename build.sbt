@@ -1,18 +1,18 @@
 lazy val Versions = new {
   val kindProjector = "0.11.0"
   val scalamacros = "2.1.1"
-  val zio = "1.0.0-RC16"
-  val zioInteropCats = "2.0.0.0-RC7"
+  val zio = "1.0.0-RC17"
+  val zioInteropCats = "2.0.0.0-RC10"
   val randomDataGenerator = "2.8"
   val logback = "1.2.3"
-  val doobie = "0.8.6"
+  val doobie = "0.8.7"
   val finch = "0.31.0"
   val jsonIgniter = "0.55.2"
   val pureconfig = "0.12.1"
   val refined = "0.9.10"
-  val circe = "0.11.2"
+  val circe = "0.12.3"
   val fintrospect="15.1.0"
-  val tapir="0.12.3"
+  val tapir="0.12.11"
 }
 
 ThisBuild / scalaVersion              := "2.12.10"
@@ -84,8 +84,8 @@ lazy val root = (project in file("."))
 val testDeps = Seq(
   "dev.zio" %% "zio-test"                          % Versions.zio                 % "test,it",
   "com.danielasfregola" %% "random-data-generator" % Versions.randomDataGenerator % "test,it",
-  "com.dimafeng" %% "testcontainers-scala"         % "0.33.0"                     % "test,it",
-  "org.testcontainers"                             % "postgresql"                 % "1.12.3" % "test,it"
+  "com.dimafeng" %% "testcontainers-scala"         % "0.34.1"                     % "test,it",
+  "org.testcontainers"                             % "postgresql"                 % "1.12.4" % "test,it"
 )
 
 val commonDeps = Seq(
@@ -103,8 +103,8 @@ val commonDeps = Seq(
   "io.circe"                    %% "circe-generic"            % Versions.circe,
   "io.circe"                    %% "circe-refined"            % Versions.circe,
   "io.circe"                    %% "circe-parser"             % Versions.circe,
-  "org.flywaydb"                %  "flyway-core"              % "6.0.8",
-  "com.github.mlangc"           %% "slf4zio"                  % "0.3.0",
+  "org.flywaydb"                %  "flyway-core"              % "6.1.2",
+  "com.github.mlangc"           %% "slf4zio"                  % "0.4.0",
   "com.softwaremill.sttp.tapir" %% "tapir-core"               % Versions.tapir,
   "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"      % Versions.tapir,
   "com.softwaremill.sttp.tapir" %% "tapir-json-circe"         % Versions.tapir,

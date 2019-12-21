@@ -2,26 +2,24 @@ package com.wantsome
 
 package interactive
 
-import com.github.mlangc.slf4zio.api._
-
 import org.http4s._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
 
 import zio._
-import zio.interop.catz._
 import zio.blocking.Blocking
 import zio.clock.Clock
+import zio.interop.catz._
+import zio.interop.catz.implicits._
 
 import sttp.tapir._
-import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.http4s._
-import sttp.tapir.docs.openapi._
-import sttp.tapir.openapi.circe.yaml._
-import sttp.tapir.json.circe._
+import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.swagger.http4s.SwaggerHttp4s
 
-import io.circe.generic.auto._
+import cats.implicits._
+import com.github.mlangc.slf4zio.api._
 
 import com.wantsome.common._, db._, data._
 import com.wantsome.verifyr.auth._
@@ -29,6 +27,8 @@ import com.wantsome.interactive.dto._
 import com.wantsome.interactive.implicits._
 
 object main extends zio.App with LoggingSupport {
+  import io.circe.generic.auto._
+  import sttp.tapir.json.circe._
   trait Env extends SettingsProvider with Auth with Repo with TransactorProvider with Clock
   object liveEnv extends LiveSettingsProvider with LiveAuth with LiveRepo with Blocking.Live
 
@@ -37,7 +37,7 @@ object main extends zio.App with LoggingSupport {
     .getOrElse(8080)
 
   private def migrate[R <: SettingsProvider]: RIO[R, Int] =
-    settings.config[SettingsProvider] >>= { c =>
+    settings.config[R] >>= { c =>
       migration.migrate(
         schema = c.database.schema.value,
         jdbcUrl = c.database.url.value,
@@ -83,24 +83,23 @@ object main extends zio.App with LoggingSupport {
     }
   }
 
+  import sttp.tapir.docs.openapi._
+  import sttp.tapir.openapi.circe.yaml._
+  val yaml = List(petEndpoint).toOpenAPI("Our pets", "1.0").toYaml
   val service2: HttpRoutes[AppS] = petServerEndpoint.toRoutes
-
-  //
 
   def serve(implicit runtime: Runtime[Env]) =
     BlazeServerBuilder[AppS]
       .bindHttp(8080, "localhost")
-      .withHttpApp(Router("/" -> service).orNotFound)
+      .withHttpApp(Router("/" -> (service2 <+> new SwaggerHttp4s(yaml).routes[AppS])).orNotFound)
       .serve
       .compile
       .drain
 
-  val yaml = List(petEndpoint).toOpenAPI("Our pets", "1.0").toYaml
-
   override def run(args: List[String]): URIO[ZEnv, Int] = {
     val managedTransactor =
       settings
-        .managedTransactor(Platform.executor.asEC)
+        .managedTransactor(platform.executor.asEC)
         .provide(liveEnv)
 
     val io = for {
