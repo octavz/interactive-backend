@@ -15,13 +15,13 @@ object migration extends LoggingSupport {
     user: String = "postgres",
     password: String = "postgres"): Task[Int] =
     logger.infoIO(s"Migrating database, for schema: $schema with url: $jdbcUrl") *>
-      ZIO.effect {
+      ZIO {
         Flyway
           .configure()
           .dataSource(jdbcUrl, user, password)
+          .defaultSchema(schema)
           .schemas(schema)
           .load()
           .migrate()
       }
-
 }

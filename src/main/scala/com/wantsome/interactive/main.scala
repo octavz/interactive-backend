@@ -11,7 +11,6 @@ import zio._
 import zio.blocking.Blocking
 import zio.clock.Clock
 import zio.interop.catz._
-import zio.interop.catz.implicits._
 
 import sttp.tapir._
 import sttp.tapir.server.http4s._
@@ -21,10 +20,8 @@ import sttp.tapir.swagger.http4s.SwaggerHttp4s
 import cats.implicits._
 import com.github.mlangc.slf4zio.api._
 
-import com.wantsome.common._, db._, data._
+import com.wantsome.common._, db._
 import com.wantsome.verifyr.auth._
-import com.wantsome.interactive.dto._
-import com.wantsome.interactive.implicits._
 
 object main extends zio.App with LoggingSupport {
   import io.circe.generic.auto._

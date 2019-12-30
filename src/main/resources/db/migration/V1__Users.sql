@@ -71,3 +71,11 @@ create table users (
 create trigger set_timestamp_users
 before update on users
 for each row execute procedure set_update_date();
+
+create table users_ (
+    id varchar(100) primary key,
+    email varchar(200) unique not null
+);
+
+insert into users_(id, email) values('id', 'test@example.com');
+

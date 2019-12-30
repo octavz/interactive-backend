@@ -1,3 +1,4 @@
+/*
 package com.wantsome.interactive
 
 import com.twitter.finagle.{Http, Service}
@@ -99,3 +100,4 @@ object mainFinch extends Endpoint.Module[RIO[FinchEnv, *]] with LoggingSupport w
     io.provide(liveEnv).foldM(t => logger.errorIO("Failed in main", t).as(0), _ => ZIO.succeed(1))
   }
 }
+ */

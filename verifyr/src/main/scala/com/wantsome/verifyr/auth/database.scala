@@ -6,6 +6,7 @@ package auth
 
 import com.wantsome.verifyr.auth.Repo.Env
 import zio._
+import doobie.implicits.javasql._
 import doobie.implicits._
 import doobie.refined.implicits._
 import common._
