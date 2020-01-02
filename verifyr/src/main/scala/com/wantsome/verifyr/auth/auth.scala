@@ -7,43 +7,36 @@ package auth
 import zio._
 import common.data._
 
-trait Auth {
-  val auth: Auth.Service
+trait AuthProvider {
+  val auth: AuthProvider.Service[Any]
 }
 
-object Auth {
-  type Env = Repo.Env with Repo
+object AuthProvider {
 
-  trait Service {
-    def registerUser(user: User): RIO[Env, User]
-    def combos: RIO[Env, Map[ComboType, Combo]]
+  trait Service[R] {
+    def registerUser(user: User): RIO[R, User]
+    def combos: RIO[R, Map[ComboType, Combo]]
+  }
+
+  object > extends Service[AuthProvider] {
+    def registerUser(user: User) = ZIO.accessM[AuthProvider](_.auth.registerUser(user))
+    def combos = ZIO.accessM[AuthProvider](_.auth.combos)
   }
 }
 
-trait AuthLiveService extends Auth.Service {
-  import database._
+trait LiveAuthProvider extends AuthProvider {
+  val repo: Repo.Service[Any]
 
-  override def registerUser(user: User): RIO[Auth.Env, User] =
-    registerUser(user)
+  val auth = new AuthProvider.Service[Any] {
+    override def registerUser(user: User) =
+      repo.saveUser(user).as(user)
 
-  override def combos: RIO[Auth.Env, Map[ComboType, Combo]] = {
-    for {
-      e <- getCombo(EnglishLevel)
-      o <- getCombo(Occupation)
-      f <- getCombo(FieldOfWork)
-    } yield Map(EnglishLevel -> e, Occupation -> o, FieldOfWork -> f)
-
+    override def combos = {
+      for {
+        e <- repo.getCombo(EnglishLevel)
+        o <- repo.getCombo(Occupation)
+        f <- repo.getCombo(FieldOfWork)
+      } yield Map(EnglishLevel -> e, Occupation -> o, FieldOfWork -> f)
+    }
   }
-}
-
-trait LiveAuth extends Auth {
-
-  override val auth: Auth.Service = new AuthLiveService {}
-}
-
-object service {
-
-  def combos[R <: Auth.Env with Auth]: RIO[R, Map[ComboType, Combo]] =
-    ZIO.accessM[R](_.auth.combos)
-
 }

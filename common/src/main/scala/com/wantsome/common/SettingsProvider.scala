@@ -2,6 +2,7 @@ package com.wantsome
 
 package common
 
+import zio.ZIO
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.NonEmpty
 import pureconfig._
@@ -21,6 +22,13 @@ object SettingsProvider {
 
   trait Service {
     def config: Either[Throwable, AppConfig]
+  }
+
+  object > {
+
+    def config =
+      ZIO.access[SettingsProvider](_.settingsProvider.config) >>= (ZIO.fromEither(_))
+
   }
 }
 

@@ -51,11 +51,11 @@ insert into field_of_work_c(value,label) values('Services/Sales','Services/Sales
 insert into field_of_work_c(value,label) values('Another','Another');
 
 create table users (
-    id uuid primary key,
+    id varchar(100) primary key,
     email varchar(200) unique not null,
     first_name varchar(200) not null,
     last_name varchar(200) not null,
-    birthday timestamp not null,
+    birthday timestamptz not null,
     city varchar(200) not null,
     phone varchar(200) not null,
     occupation smallint not null references occupation_c(id),
@@ -72,10 +72,7 @@ create trigger set_timestamp_users
 before update on users
 for each row execute procedure set_update_date();
 
-create table users_ (
-    id varchar(100) primary key,
-    email varchar(200) unique not null
-);
-
-insert into users_(id, email) values('id', 'test@example.com');
-
+insert into users(id, email, first_name, last_name, birthday, city, phone, occupation, 
+  field_of_work, english_level, it_experience, experience_description, heard_from) values (
+  'user0', 'user0@example.com','John','User', '1980-01-30 00:00:00Z', 
+  'Iasi','0740012345', 1,1, 1, true, 'did some work for a site', 'facebook')

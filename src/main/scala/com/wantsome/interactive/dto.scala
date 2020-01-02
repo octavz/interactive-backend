@@ -3,20 +3,31 @@ package com.wantsome
 package interactive
 
 import java.sql.Timestamp
+import eu.timepit.refined.auto._
 import common.data._
 
 object dto {
-  type ComboDTO = List[ComboValue]
-  case class CombosDTO(occupation: List[ComboValue], fieldOfWork: List[ComboValue], englishLevel: List[ComboValue])
+  case class ComboValueDTO(id: Short, value: String, label: String)
+
+  case class CombosDTO(
+    occupation: List[ComboValueDTO],
+    fieldOfWork: List[ComboValueDTO],
+    englishLevel: List[ComboValueDTO])
+
+  object ComboValueDTO {
+
+    def apply(c: ComboValue): ComboValueDTO =
+      ComboValueDTO(id = c.id, value = c.value, label = c.label)
+  }
 
   case class UserDTO(
     id: Option[Id],
-    email: DbString,
-    firstName: DbString,
-    lastName: DbString,
+    email: String,
+    firstName: String,
+    lastName: String,
     birthday: Timestamp,
-    city: DbString,
-    phone: DbString,
+    city: String,
+    phone: String,
     occupation: Short,
     fieldOfWork: Short,
     englishLevel: Short,

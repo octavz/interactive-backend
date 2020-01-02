@@ -14,11 +14,9 @@ object utils {
   sealed trait DatabaseError extends Throwable
   case object InsertFailed extends DatabaseError
 
-  def transactor[R <: TransactorProvider]: ZIO[R, Nothing, Transactor[Task]] =
-    ZIO.access[R](_.transactor())
-
-  def runDb[R <: TransactorProvider, A](trans: => ConnectionIO[A]): RIO[R, A] =
-    transactor[R] >>= (trans.transact(_))
+  // def transactor = ZIO.access[TransactorProvider](_.transactor())
+  //
+  // def runDb[A](trans: => ConnectionIO[A]) = transactor >>= (trans.transact(_))
   /*
   def appConfig[R <: SettingsProvider]: RIO[R, AppConfig] =
     ZIO.accessM[R](_.settings())

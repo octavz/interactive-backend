@@ -1,23 +1,15 @@
 package com.wantsome.interactive
 
 import zio.{test => _, _}
-import zio.test._
-import zio.test.Assertion._
-import zio.interop.catz._
 
-import org.flywaydb.core.Flyway
 import java.sql._
 import eu.timepit.refined._
 import eu.timepit.refined.auto._
 import eu.timepit.refined.collection.NonEmpty
 
 import doobie._
-import doobie.implicits._
-import cats.effect.Blocker
 import scala.concurrent.ExecutionContext
-import com.zaxxer.hikari.HikariDataSource
 
-import doobie.hikari.HikariTransactor
 import com.wantsome.common.db.migration
 import com.wantsome.common.DatabaseConfig
 

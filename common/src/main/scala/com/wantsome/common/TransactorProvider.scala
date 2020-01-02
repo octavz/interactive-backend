@@ -8,7 +8,11 @@ import zio._
 object TransactorProvider {
 
   trait Service {
-    def apply(): Transactor[Task]
+    val transactor: Transactor[Task]
+  }
+
+  object > {
+    val transactor = ZIO.access[TransactorProvider](_.transactor)
   }
 }
 
