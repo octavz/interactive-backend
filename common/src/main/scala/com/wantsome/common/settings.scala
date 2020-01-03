@@ -12,9 +12,10 @@ import com.wantsome.common.db.transactor
 object settings {
 
   def managedTransactor(
-    ec: ExecutionContext): ZManaged[SettingsProvider with Blocking, Throwable, Transactor[Task]] = {
+    settingsProvider: SettingsProvider,
+    ec: ExecutionContext): ZManaged[Blocking, Throwable, Transactor[Task]] = {
     val io = for {
-      c <- SettingsProvider.>.config
+      c <- settingsProvider.zioConfig
       blockingEc <- ZIO.accessM[Blocking](_.blocking.blockingExecutor.map(_.asEC))
     } yield transactor.mkTransactor(c.database, ec, blockingEc)
 

@@ -11,6 +11,8 @@ import eu.timepit.refined.auto._
 import com.github.mlangc.slf4zio.api._
 
 import com.wantsome.interactive.ZIOUtils._
+import com.wantsome.common.data._
+import com.wantsome.verifyr.auth._
 
 object RegistrationSpec 
     extends DefaultRunnableSpec ({
@@ -33,6 +35,17 @@ object RegistrationSpec
           testM("correctly migrates the database and creates user table") {
             val recs = sql"""select id from users""".query[String].option.zio
             assertM(recs, isSome(equalsIgnoreCase("user0")))
+          },
+          testM("correctly retrieves groups") {
+            val recs = Repo.>.groups
+            val expected = List(Group(id = "student", description="student"), Group(id = "admin", description="admin"))
+            assertM(recs, hasSameElements(expected))
+          },
+          testM("correctly inserts users") {
+            val testUser = Gen.any
+            val recs = Repo.>.insertUser(testUser)
+            val expected = List(Group(id = "student", description="student"), Group(id = "admin", description="admin"))
+            assertM(recs, hasSameElements(expected))
           }
         )
       }

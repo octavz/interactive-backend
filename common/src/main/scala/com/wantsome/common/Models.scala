@@ -23,7 +23,7 @@ private[common] trait Models {
   case object FieldOfWork extends ComboType
 
   case class User(
-    id: Option[Id],
+    id: Id,
     email: DbString,
     firstName: DbString,
     lastName: DbString,
@@ -35,5 +35,18 @@ private[common] trait Models {
     englishLevel: Short,
     itExperience: Boolean,
     experienceDescription: Option[String],
-    heardFrom: String)
+    heardFrom: String,
+    groups: List[Id]
+  )
+
+  case class Group(id: Id, description: String)
+  case class UserGroup(userId: Id, groupId: Id)
+
+  case class Invitation(id: Id, userId: Id, expiresAt: Timestamp)
+
+  case class Quiz(id: Id, userId: Id, description: String)
+  case class QuestionSet(id: Id, quizzId: Id, title: String)
+  case class Question(id: Id, questionSetId: Id, content: String)
+  case class Answer(id: Id, questionId: Id, content: String, isCorrect: Boolean)
+
 }

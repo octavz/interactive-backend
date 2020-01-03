@@ -12,6 +12,8 @@ import scala.concurrent.ExecutionContext
 
 import com.wantsome.common.db.migration
 import com.wantsome.common.DatabaseConfig
+import com.wantsome.verifyr.auth._
+import com.wantsome.common.TransactorProvider
 
 trait TestContext {
   val config: DatabaseConfig
@@ -35,7 +37,7 @@ object TestContext {
       ExecutionContext.Implicits.global,
       ExecutionContexts.synchronous)
 
-  def make: ZManaged[ContainerProvider, Nothing, TestContext with ContainerProvider] =
+  def make: ZManaged[ContainerProvider, Nothing, TestContext with ContainerProvider with LiveRepo] =
     (for {
       cont <- ZIO.access[ContainerProvider](_.container).toManaged_
       _ <- ZIO.effectTotal( println( s"seting up transactor for ${cont.container.getContainerId}")).toManaged_
@@ -55,11 +57,14 @@ object TestContext {
       }.toManaged(c => ZIO(c.close).orDie)
       _ <- ZIO.effectTotal(println(s"Created connection for $jdbcUrl")).toManaged_
       tr <- testTransactor(c)
-    } yield new ContainerProvider with TestContext {
+    } yield new ContainerProvider with TestContext with LiveRepo {
       override val conn = co
       override val container = cont
       override val config = c
       override val transactor = tr
+      override val transactorProvider = new TransactorProvider{
+        override val transactor = tr
+      }
     }).orDie
 
 }

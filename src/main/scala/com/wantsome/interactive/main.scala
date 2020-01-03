@@ -38,9 +38,11 @@ object main extends zio.App with LoggingSupport with TapirJsonCirce {
   //   override val repo = (new verifyr.auth.LiveRepo{}).userRepo
   // }
   //
+  val settingsProvider = new LiveSettingsProvider {}
+
   def liveEnv(t: doobie.Transactor[Task]) = new LiveAuthProvider with Clock.Live {
     override val repo = new LiveRepo {
-      override val transactorProvider = new TransactorProvider.Service {
+      override val transactorProvider = new TransactorProvider {
         override val transactor = t
       }
     }.userRepo
@@ -52,8 +54,8 @@ object main extends zio.App with LoggingSupport with TapirJsonCirce {
     .map(_.toInt)
     .getOrElse(8080)
 
-  private def migrate: RIO[SettingsProvider, Int] =
-    SettingsProvider.>.config >>= { c =>
+  private def migrate: RIO[Any, Int] =
+    settingsProvider.zioConfig >>= { c =>
       migration.migrate(
         schema = c.database.schema.value,
         jdbcUrl = c.database.url.value,
@@ -116,8 +118,8 @@ object main extends zio.App with LoggingSupport with TapirJsonCirce {
   override def run(args: List[String]): URIO[ZEnv, Int] = {
     val managedTransactor =
       settings
-        .managedTransactor(platform.executor.asEC)
-        .provide(new LiveSettingsProvider with Blocking.Live)
+        .managedTransactor(settingsProvider, platform.executor.asEC)
+        .provide(new Blocking.Live {})
 
     val io = for {
       _ <- migrate
@@ -128,7 +130,6 @@ object main extends zio.App with LoggingSupport with TapirJsonCirce {
           .provide(liveEnv(t))
       } *> ZIO.never
     } yield service
-    io.provide(new LiveSettingsProvider with Blocking.Live)
-      .foldM(t => logger.errorIO("Failed in main", t).as(0), _ => ZIO.succeed(1))
+    io.foldM(t => logger.errorIO("Failed in main", t).as(0), _ => ZIO.succeed(1))
   }
 }

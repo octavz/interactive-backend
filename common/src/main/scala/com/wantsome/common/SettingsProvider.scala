@@ -18,35 +18,19 @@ case class DatabaseConfig(
   user: Refined[String, NonEmpty],
   password: Refined[String, NonEmpty])
 
-object SettingsProvider {
-
-  trait Service {
-    def config: Either[Throwable, AppConfig]
-  }
-
-  object > {
-
-    def config =
-      ZIO.access[SettingsProvider](_.settingsProvider.config) >>= (ZIO.fromEither(_))
-
-  }
-}
-
 trait SettingsProvider {
-  val settingsProvider: SettingsProvider.Service
+  val config: Either[Throwable, AppConfig]
+
+  val zioConfig = ZIO.fromEither(config)
 }
 
-trait LiveSettingsProviderService extends SettingsProvider.Service {
+trait LiveSettingsProvider extends SettingsProvider {
 
-  override def config: Either[Throwable, AppConfig] =
+  override val config: Either[Throwable, AppConfig] =
     ConfigSource.default.load[AppConfig] match {
       case Right(value) => Right(value)
       case Left(err) =>
         val errString = err.toList.map(_.description).mkString(",")
         Left(new Exception(errString))
     }
-}
-
-trait LiveSettingsProvider extends SettingsProvider {
-  override val settingsProvider: SettingsProvider.Service = new LiveSettingsProviderService {}
 }
