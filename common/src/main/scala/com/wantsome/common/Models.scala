@@ -2,7 +2,7 @@ package com.wantsome
 
 package common
 
-import eu.timepit.refined.W
+import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.boolean.And
 import eu.timepit.refined.collection.{MaxSize, NonEmpty}
@@ -10,7 +10,8 @@ import java.sql.Timestamp
 
 private[common] trait Models {
 
-  type DbString = String Refined (NonEmpty And MaxSize[W.`200`.T])
+  type DbStringConstraint = NonEmpty And MaxSize[W.`200`.T]
+  type DbString = String Refined DbStringConstraint
   type Id = String
   type ComboId = Short
 
@@ -35,8 +36,7 @@ private[common] trait Models {
     englishLevel: Short,
     itExperience: Boolean,
     experienceDescription: Option[String],
-    heardFrom: String,
-    groups: List[Id]
+    heardFrom: String
   )
 
   case class Group(id: Id, description: String)

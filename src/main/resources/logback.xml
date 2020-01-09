@@ -7,7 +7,7 @@
 
     <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
 
-    <root level="TRACE">
+    <root level="INFO">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <target>System.out</target>
             <encoder>

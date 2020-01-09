@@ -8,19 +8,19 @@ lazy val Versions = new {
   val pureconfig = "0.12.2"
   val refined = "0.9.10"
   val circe = "0.12.3"
-  val tapir="0.12.12"
-  val flyway="6.1.3"
-  val zioLogging="0.4.0"
-  val testcontainers="0.34.2"
+  val tapir = "0.12.12"
+  val flyway = "6.1.3"
+  val zioLogging = "0.4.0"
+  val testcontainers = "0.34.2"
 }
 
 //Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / scalaVersion              := "2.13.1"
-ThisBuild / organization              := "com.wantsome"
-ThisBuild / scalafmtOnCompile         := true
-ThisBuild / turbo := false
-ThisBuild / scalacOptions             := Seq(
+ThisBuild / scalaVersion      := "2.13.1"
+ThisBuild / organization      := "com.wantsome"
+ThisBuild / scalafmtOnCompile := true
+ThisBuild / turbo             := false
+ThisBuild / scalacOptions := Seq(
   "-Ywarn-unused",
   "-Ywarn-numeric-widen",
   "-deprecation",
@@ -60,26 +60,26 @@ lazy val verifyr = (project in file("verifyr"))
 lazy val root = (project in file("."))
   .configs(IntegrationTest)
   .settings(
-    name           := "interactive",
+    name := "interactive",
     libraryDependencies ++= interactiveDeps,
     testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
-    addCompilerPlugin ("com.olegpy" %% "better-monadic-for" % "0.3.1")
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
   )
   .settings(Defaults.itSettings)
   .dependsOn(verifyr, testr)
 
 // Scala libraries
 val testDeps = Seq(
-  "dev.zio" %% "zio-test"                          % Versions.zio                 % "test,it",
-  "com.dimafeng" %% "testcontainers-scala"         % Versions.testcontainers      % "test,it",
-  "org.testcontainers"                             % "postgresql"                 % "1.12.4" % "test,it"
+  "dev.zio"            %% "zio-test"             % Versions.zio            % "test,it",
+  "com.dimafeng"       %% "testcontainers-scala" % Versions.testcontainers % "test,it",
+  "org.testcontainers" % "postgresql"            % "1.12.4"                % "test,it"
 )
 
 val commonDeps = Seq(
   "dev.zio"                     %% "zio"                      % Versions.zio,
   "dev.zio"                     %% "zio-test-sbt"             % Versions.zio,
   "dev.zio"                     %% "zio-interop-cats"         % Versions.zioInteropCats,
-  "ch.qos.logback"              %  "logback-classic"          % Versions.logback,
+  "ch.qos.logback"              % "logback-classic"           % Versions.logback,
   "org.tpolecat"                %% "doobie-core"              % Versions.doobie,
   "org.tpolecat"                %% "doobie-postgres"          % Versions.doobie,
   "org.tpolecat"                %% "doobie-hikari"            % Versions.doobie,
@@ -90,7 +90,7 @@ val commonDeps = Seq(
   "io.circe"                    %% "circe-generic"            % Versions.circe,
   "io.circe"                    %% "circe-refined"            % Versions.circe,
   "io.circe"                    %% "circe-parser"             % Versions.circe,
-  "org.flywaydb"                %  "flyway-core"              % Versions.flyway,
+  "org.flywaydb"                % "flyway-core"               % Versions.flyway,
   "com.github.mlangc"           %% "slf4zio"                  % Versions.zioLogging,
   "com.softwaremill.sttp.tapir" %% "tapir-core"               % Versions.tapir,
   "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"      % Versions.tapir,

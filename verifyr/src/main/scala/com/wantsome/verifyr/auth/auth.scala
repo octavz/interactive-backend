@@ -29,7 +29,7 @@ trait LiveAuthProvider extends AuthProvider {
 
   val auth = new AuthProvider.Service[Any] {
     override def registerUser(user: User) =
-      repo.saveUser(user).as(user)
+      repo.insertUser(user, List("student")).as(user)
 
     override def combos = {
       for {

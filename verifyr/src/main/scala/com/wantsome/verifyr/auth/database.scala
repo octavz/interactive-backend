@@ -21,13 +21,13 @@ trait Repo {
 object Repo {
 
   trait Service[R] {
-    def insertUser(user: User): RIO[R, Unit]
+    def insertUser(user: User, groups: List[Id]): RIO[R, Unit]
     def getCombo(c: ComboType): RIO[R, Combo]
     def groups: RIO[R, List[Group]]
   }
 
   object > extends Service[Repo] {
-    def insertUser(user: User) = ZIO.accessM(_.userRepo.insertUser(user))
+    def insertUser(user: User, groups: List[Id]) = ZIO.accessM(_.userRepo.insertUser(user, groups))
     def getCombo(c: ComboType) = ZIO.accessM(_.userRepo.getCombo(c))
     def groups = ZIO.accessM(_.userRepo.groups)
   }
@@ -43,19 +43,19 @@ trait LiveRepo extends Repo {
   def runDb[A](trans: => ConnectionIO[A]) = trans.transact(transactorProvider.transactor)
 
   override val userRepo = new Repo.Service[Any] {
-    override def insertUser(user: User) =
+    override def insertUser(user: User, groups: List[Id]) =
       runDb {
-        val groups = user.groups.map(g => UserGroup(userId = user.id, groupId = g))
+        val userGroups = groups.map(g => UserGroup(userId = user.id, groupId = g))
         for {
           u <- sql"""insert into users(id,email,first_name,last_name,birthday,city,phone, 
             occupation,field_of_work,english_level,it_experience,experience_description,heard_from)
             values(${user.id},${user.email},${user.firstName},${user.lastName},${user.birthday},
             ${user.city},${user.phone},${user.occupation},${user.fieldOfWork},${user.englishLevel},
             ${user.itExperience},${user.experienceDescription},${user.heardFrom})""".update.run
-          g <- Update[UserGroup]("insert into user_groups(user_id, group_id) values(?,?)")
-            .updateMany(groups)
+          g <- Update[UserGroup]("insert into groups_users(user_id, group_id) values(?,?)")
+                .updateMany(userGroups)
         } yield (u, g)
-      } >>= (res => if (res == (1, user.groups.size)) ZIO.unit else ZIO.fail(InsertFailed))
+      } >>= (res => if (res == (1, groups.size)) ZIO.unit else ZIO.fail(InsertFailed))
 
     override def getCombo(c: ComboType) = runDb {
       val res = c match {
