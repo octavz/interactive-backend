@@ -15,7 +15,7 @@ object settings {
     settingsProvider: SettingsProvider,
     ec: ExecutionContext): ZManaged[Blocking, Throwable, Transactor[Task]] = {
     val io = for {
-      c <- settingsProvider.zioConfig
+      c          <- settingsProvider.zioConfig
       blockingEc <- ZIO.accessM[Blocking](_.blocking.blockingExecutor.map(_.asEC))
     } yield transactor.mkTransactor(c.database, ec, blockingEc)
 

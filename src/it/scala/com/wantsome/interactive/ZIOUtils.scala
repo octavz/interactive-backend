@@ -13,11 +13,7 @@ object ZIOUtils extends LoggingSupport {
   implicit class DoobieHelper[A](q: ConnectionIO[A]) {
 
     def zio[A] =
-      for {
-        xa  <- ZIO.access[TestContext](_.transactor)
-        _   <- logger.infoIO(s"Running query with config: ${xa.kernel}")
-        res <- q.transact(xa)
-      } yield res
+        ZIO.access[TestContext](_.transactor) >>= (q.transact(_))
   }
 
 }

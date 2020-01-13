@@ -12,7 +12,7 @@ import zio.blocking.Blocking
 import zio.clock.Clock
 import zio.interop.catz._
 
-import sttp.tapir._
+import sttp.tapir.{auth => _, _}
 import sttp.tapir.server.http4s._
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.swagger.http4s.SwaggerHttp4s
@@ -34,19 +34,16 @@ import com.wantsome.interactive.dto._
 object main extends zio.App with LoggingSupport with TapirJsonCirce {
   type Env = AuthProvider with Clock
 
-  // val liveEnv = new AuthProvider with Clock.Live {
-  //   override val repo = (new verifyr.auth.LiveRepo{}).userRepo
-  // }
-  //
-  val settingsProvider = new LiveSettingsProvider {}
+  def liveEnv(t: doobie.Transactor[Task]) =
+    new LiveAuthProvider with LiveDates with Clock.Live {
 
-  def liveEnv(t: doobie.Transactor[Task]) = new LiveAuthProvider with Clock.Live {
-    override val repo = new LiveRepo {
-      override val transactorProvider = new TransactorProvider {
-        override val transactor = t
-      }
-    }.userRepo
-  }
+      override val settingsProvider: SettingsProvider = LiveSettingsProvider
+      override val repo = new LiveRepo {
+        override val transactorProvider = new TransactorProvider {
+          override val transactor = t
+        }
+      }.repo
+    }
 
   type AppS[A] = RIO[Env, A]
 
@@ -55,7 +52,7 @@ object main extends zio.App with LoggingSupport with TapirJsonCirce {
     .getOrElse(8080)
 
   private def migrate: RIO[Any, Int] =
-    settingsProvider.zioConfig >>= { c =>
+    LiveSettingsProvider.zioConfig >>= { c =>
       migration.migrate(
         schema = c.database.schema.value,
         jdbcUrl = c.database.url.value,
@@ -65,8 +62,7 @@ object main extends zio.App with LoggingSupport with TapirJsonCirce {
 
   implicit class ZioEndpoint[I, E, O](e: Endpoint[I, E, O, EntityBody[AppS]]) {
 
-    def toZioRoutes(logic: I => ZIO[Env, E, O])(
-      implicit serverOptions: Http4sServerOptions[AppS]): HttpRoutes[AppS] = {
+    def toZioRoutes(logic: I => ZIO[Env, E, O])(implicit serverOptions: Http4sServerOptions[AppS]): HttpRoutes[AppS] = {
       e.toRoutes(i => logic(i).either)
     }
 
@@ -86,7 +82,7 @@ object main extends zio.App with LoggingSupport with TapirJsonCirce {
       .out(jsonBody[CombosDTO])
 
   val combos = combosEndpoint.toZioRoutes { _ =>
-    AuthProvider.>.combos
+    auth.combos
       .map(dic =>
         CombosDTO(
           englishLevel = dic(EnglishLevel).values.map(ComboValueDTO(_)),
@@ -109,8 +105,7 @@ object main extends zio.App with LoggingSupport with TapirJsonCirce {
   def serve(implicit runtime: Runtime[Env]) =
     BlazeServerBuilder[AppS]
       .bindHttp(8080, "localhost")
-      .withHttpApp(
-        Router("/" -> (combos <+> pet <+> new SwaggerHttp4s(yaml).routes[AppS])).orNotFound)
+      .withHttpApp(Router("/" -> (combos <+> pet <+> new SwaggerHttp4s(yaml).routes[AppS])).orNotFound)
       .serve
       .compile
       .drain
@@ -118,17 +113,17 @@ object main extends zio.App with LoggingSupport with TapirJsonCirce {
   override def run(args: List[String]): URIO[ZEnv, Int] = {
     val managedTransactor =
       settings
-        .managedTransactor(settingsProvider, platform.executor.asEC)
+        .managedTransactor(LiveSettingsProvider, platform.executor.asEC)
         .provide(new Blocking.Live {})
 
     val io = for {
       _ <- migrate
       service <- managedTransactor.use { t =>
-        ZIO
-          .runtime[Env]
-          .flatMap(implicit runtime => serve)
-          .provide(liveEnv(t))
-      } *> ZIO.never
+                  ZIO
+                    .runtime[Env]
+                    .flatMap(implicit runtime => serve)
+                    .provide(liveEnv(t))
+                } *> ZIO.never
     } yield service
     io.foldM(t => logger.errorIO("Failed in main", t).as(0), _ => ZIO.succeed(1))
   }

@@ -5,6 +5,7 @@ package verifyr
 package auth
 
 import zio._
+import zio.clock.Clock
 import zio.interop.catz._
 import doobie._
 import doobie.implicits._
@@ -13,28 +14,26 @@ import doobie.refined.implicits._
 import cats.implicits._
 import common._
 import common.data._
+import zio.macros.annotation.accessible
 
+@accessible(">")
 trait Repo {
-  val userRepo: Repo.Service[Any]
+  val repo: Repo.Service[Any]
 }
 
 object Repo {
 
   trait Service[R] {
     def insertUser(user: User, groups: List[Id]): RIO[R, Unit]
+    def insertInvitation(invitation: Invitation): RIO[R, Unit]
     def getCombo(c: ComboType): RIO[R, Combo]
     def groups: RIO[R, List[Group]]
   }
 
-  object > extends Service[Repo] {
-    def insertUser(user: User, groups: List[Id]) = ZIO.accessM(_.userRepo.insertUser(user, groups))
-    def getCombo(c: ComboType) = ZIO.accessM(_.userRepo.getCombo(c))
-    def groups = ZIO.accessM(_.userRepo.groups)
-  }
 }
 
 sealed trait DatabaseError extends Throwable
-case object InsertFailed extends DatabaseError
+case class InsertFailed(message: String) extends DatabaseError
 
 trait LiveRepo extends Repo {
 
@@ -42,7 +41,7 @@ trait LiveRepo extends Repo {
 
   def runDb[A](trans: => ConnectionIO[A]) = trans.transact(transactorProvider.transactor)
 
-  override val userRepo = new Repo.Service[Any] {
+  override val repo = new Repo.Service[Any] {
     override def insertUser(user: User, groups: List[Id]) =
       runDb {
         val userGroups = groups.map(g => UserGroup(userId = user.id, groupId = g))
@@ -55,7 +54,14 @@ trait LiveRepo extends Repo {
           g <- Update[UserGroup]("insert into groups_users(user_id, group_id) values(?,?)")
                 .updateMany(userGroups)
         } yield (u, g)
-      } >>= (res => if (res == (1, groups.size)) ZIO.unit else ZIO.fail(InsertFailed))
+      } >>= (res =>
+        if (res == (1, groups.size)) ZIO.unit else ZIO.fail(InsertFailed(s"User insert failed for $user with $groups")))
+
+    override def insertInvitation(invitation: Invitation) =
+      runDb {
+        sql"""insert into invitations(id,user_id,expires_at)
+            values(${invitation.id},${invitation.userId},${invitation.expiresAt})""".update.run
+      } >>= (res => if (res == 1) ZIO.unit else ZIO.fail(InsertFailed(s"Invitation insert failed for: $invitation")))
 
     override def getCombo(c: ComboType) = runDb {
       val res = c match {
