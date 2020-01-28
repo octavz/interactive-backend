@@ -1,25 +1,35 @@
-
 {
-  "name": "react-hooks-template",
+  "name": "wantsome-platform-ui",
   "reason": {
     "react-jsx": 3
   },
   "sources": {
-    "dir" : "src",
-    "subdirs" : true
+    "dir": "src",
+    "subdirs": true
   },
-  "package-specs": [{
-    "module": "commonjs",
-    "in-source": true
-  }],
+  "bsc-flags": [
+    "-bs-super-errors",
+    "-bs-no-version-header"
+  ],
+  "package-specs": [
+    {
+      "module": "commonjs",
+      "in-source": true
+    }
+  ],
   "suffix": ".bs.js",
-  "namespace": true,
+  "namespace": false,
   "bs-dependencies": [
     "reason-react",
-    "@glennsl/bs-json",
     "@ahrefs/bs-reactstrap",
     "bs-fetch",
-    "bs-abstract"
+    "decco"
   ],
-  "refmt": 3
+  "ppx-flags": [
+    "decco/ppx"
+  ],
+  "refmt": 3,
+  "warnings": {
+    "error": "+8"
+  }
 }

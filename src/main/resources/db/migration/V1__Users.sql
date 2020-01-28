@@ -25,8 +25,8 @@ create table occupation_c(
 
 insert into occupation_c(value,label) values('Employee','Employee');
 insert into occupation_c(value,label) values('Student','Student');
-insert into occupation_c(value,label) values('SelfEmployed','SelfEmployed');
-insert into occupation_c(value,label) values('NoOccupation','NoOccupation');
+insert into occupation_c(value,label) values('SelfEmployed','Self Employed');
+insert into occupation_c(value,label) values('NoOccupation','No Occupation');
 
 create table field_of_work_c(
   id serial primary key,

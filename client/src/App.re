@@ -24,7 +24,7 @@ let make = () => {
        if (state.currentPage != Register) {
          setState(_ => {currentPage: Register});
        };
-       <Register />;
+       <Register/>;
      }}
   </div>;
 };

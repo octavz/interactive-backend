@@ -11,7 +11,9 @@ type validationErrors = array(string);
 
 type state = {
   user: userDto,
+  shouldInit: bool,
   shouldPost: bool,
+  combos: combosDto,
   errors: Js.Dict.t(validationErrors),
 };
 
@@ -31,7 +33,9 @@ let emptyState = {
     experienceDescription: None,
     heardFrom: "",
   },
+  combos: emptyCombosDto,
   shouldPost: false,
+  shouldInit: true,
   errors: Js.Dict.empty(),
 };
 
@@ -46,10 +50,11 @@ type action =
   | FieldOfWorkChanged(int)
   | EnglishLevelChanged(int)
   | ITExpChanged(bool)
-  | ExpDescChanged(option(string))
+  | ExpDescChanged(string)
   | HeardFromChanged(string)
   | Post
   | PostFinished(Server.serverResponse(unit))
+  | RequestCombos(Server.serverResponse(combosDto))
   | Validate(string, validationErrors);
 
 let hasErrors = s => s.errors |> Js.Dict.values |> Js.Array.length > 0;
@@ -70,11 +75,13 @@ let reducer = (_state, action) => {
   | FieldOfWorkChanged(i) => {..._state.user, fieldOfWork: i} |> update
   | EnglishLevelChanged(i) => {..._state.user, englishLevel: i} |> update
   | ITExpChanged(b) => {..._state.user, itExperience: b} |> update
-  | ExpDescChanged(s) => {..._state.user, experienceDescription: s} |> update
+  | ExpDescChanged(s) => {..._state.user, experienceDescription: Some(s)} |> update
   | HeardFromChanged(s) => {..._state.user, heardFrom: s} |> update
   | Post => _state |> hasErrors ? _state : {..._state, shouldPost: true}
   | PostFinished(Ok(_)) => {..._state, shouldPost: false}
   | PostFinished(Error(_)) => {..._state, shouldPost: false}
+  | RequestCombos(Ok(combos)) => {..._state, combos:combos, shouldInit: false}
+  | RequestCombos(Error(_)) => {..._state, shouldInit: false}
   | Validate(f, e) =>
     Js.Dict.set(_state.errors, f, e);
     _state;
@@ -111,6 +118,24 @@ let make = () => {
       );
     */
 
+   let errHandlerInit = e => {
+     dispatch(RequestCombos(Belt.Result.Error(e))) |> Js.Promise.resolve;
+   };
+
+   let respHandlerInit = r => {
+     dispatch(RequestCombos(Belt.Result.Ok(r))) |> Js.Promise.resolve;
+   };
+
+      React.useEffect1(
+        () => {
+          if (state.shouldInit) {
+            Server.getCombos( respHandlerInit, errHandlerInit);
+          };
+          None;
+        },
+        [|state.shouldPost|],
+      );
+
   <Container>
     <Row>
       <Col md=4 className="text-center p-4 offset-4">
@@ -120,7 +145,7 @@ let make = () => {
       </Col>
     </Row>
     <Row>
-      <Col md=4 className="offset-4">
+      <Col md=5 className="offset-4">
         <Form>
           <FormInput
             id="firstName"
@@ -160,15 +185,42 @@ let make = () => {
             _type="select"
             label="Momentan sunt"
             value={string_of_int(state.user.occupation)}
-            validators=[|required|]
-            onValidate={e => dispatch(Validate("occupation", e))}
             onChange={v => dispatch(OccupationChanged(int_of_string(v)))}
-            options={Js.Dict.fromList([
-              ("1", "Angajat"),
-              ("2", "Student"),
-              ("3", "Liber profesionist"),
-              ("4", "Fara ocupatie"),
-            ])}
+            options={Js.Dict.fromArray(state.combos.occupation |> Js.Array.map(v => (v.id |> string_of_int, v.label |>
+            Js.Option.getWithDefault(""))))}
+          />
+          <FormInput
+            id="fieldOfWork"
+            _type="select"
+            label="Domeniu de activitate"
+            value={string_of_int(state.user.fieldOfWork)}
+            onChange={v => dispatch(FieldOfWorkChanged(int_of_string(v)))}
+            options={Js.Dict.fromArray(state.combos.fieldOfWork |> Js.Array.map(v => (v.id |> string_of_int, v.label |>
+            Js.Option.getWithDefault(""))))}
+          />
+          <FormInput
+            id="englishLevel"
+            _type="select"
+            label="Nivelul limbii engleze"
+            value={string_of_int(state.user.englishLevel)}
+            onChange={v => dispatch(EnglishLevelChanged(int_of_string(v)))}
+            options={Js.Dict.fromArray(state.combos.englishLevel |> Js.Array.map(v => (v.id |> string_of_int, v.label |>
+            Js.Option.getWithDefault(""))))}
+          />
+          <FormRadio
+            id="itExperience"
+            label="Cunostinte in domeniul IT"
+            value={string_of_bool(state.user.itExperience)}
+            onChange={v => dispatch(ITExpChanged(bool_of_string(v)))}
+            values={[| ("Da","true"), ("Nu","false") |] }
+          />
+          <FormInput
+            id="expDescription"
+            label={js|Dacă ai răspuns da mai sus, te rugăm să detaliezi|js}
+            placeholder = ""
+            _type="textarea"
+            value={state.user.email}
+            onChange={v => dispatch(ExpDescChanged(v))}
           />
         </Form>
       </Col>

@@ -1,10 +1,28 @@
+open Belt;
+
 type dictString = Js.Dict.t(string);
 
+module Date = {
+    let encoder: Decco.encoder(Js.Date.t) =
+      date => Js.Date.toISOString(date)->Decco.stringToJson;
+    let decoder: Decco.decoder(Js.Date.t) =
+      json => {
+        switch (Decco.stringFromJson(json)) {
+        | Result.Ok(v) => Js.Date.fromString(v)->Ok
+        | Result.Error(_) as err => err
+        };
+      };
+    let codec: Decco.codec(Js.Date.t) = (encoder, decoder);
+    [@decco]
+    type t = [@decco.codec codec] Js.Date.t;
+};
+
+[@decco]
 type userDto = {
   id: option(string),
   firstName: string,
   lastName: string,
-  birthday: Js.Date.t,
+  birthday: [@decco.codec Date.codec] Js.Date.t,
   city: string,
   email: string,
   phone: string,
@@ -16,56 +34,22 @@ type userDto = {
   heardFrom: string,
 };
 
-type comboItemDto = {
+[@decco.decoder]
+type comboValueDto = {
   id: int,
   value: string,
   label: option(string),
 };
 
-module Decode = {
-  open! Json.Decode;
+[@decco.decoder]
+type combosDto = {
+  occupation:   array(comboValueDto),
+  fieldOfWork:  array(comboValueDto),
+  englishLevel: array(comboValueDto),
+}
 
-  let userDtoDecode = json => {
-    id: json |> field("id", optional(string)),
-    firstName: json |> field("firstName", string),
-    lastName: json |> field("lastName", string),
-    birthday: json |> field("birthday", date),
-    city: json |> field("city", string),
-    email: json |> field("email", string),
-    phone: json |> field("phone", string),
-    occupation: json |> field("occupation", int),
-    fieldOfWork: json |> field("fieldOfWork", int),
-    englishLevel: json |> field("englishLevel", int),
-    itExperience: json |> field("itExperience", bool),
-    experienceDescription:
-      json |> field("experienceDescription", optional(string)),
-    heardFrom: json |> field("heardFrom", string),
-  };
-
-  let comboItemDtoDecode = json => {
-    id: json |> field("id", int),
-    value: json |> field("value", string),
-    label: json |> field("label", optional(string)),
-  };
-};
-
-module Encode = {
-  let userDtoEncode = (c: userDto) => {
-    open! Json.Encode;
-    object_([
-      ("id", c.id |> nullable(string)),
-      ("firstName", string(c.firstName)),
-      ("lastName", string(c.lastName)),
-      ("birthday", date(c.birthday)),
-      ("city", string(c.city)),
-      ("email", string(c.email)),
-      ("phone", string(c.phone)),
-      ("occupation", int(c.occupation)),
-      ("fieldOfWork", int(c.fieldOfWork)),
-      ("englishLevel", int(c.englishLevel)),
-      ("itExperience", bool(c.itExperience)),
-      ("experienceDescription", c.experienceDescription |> nullable(string)),
-      ("heardFrom", string(c.heardFrom)),
-    ]);
-  };
-};
+let emptyCombosDto = {
+  occupation:   [||],
+  fieldOfWork:  [||],
+  englishLevel: [||],
+}

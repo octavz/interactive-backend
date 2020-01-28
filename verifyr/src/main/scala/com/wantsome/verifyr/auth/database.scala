@@ -5,7 +5,6 @@ package verifyr
 package auth
 
 import zio._
-import zio.clock.Clock
 import zio.interop.catz._
 import doobie._
 import doobie.implicits._

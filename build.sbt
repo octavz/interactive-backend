@@ -8,12 +8,11 @@ lazy val Versions = new {
   val pureconfig = "0.12.2"
   val refined = "0.9.10"
   val circe = "0.12.3"
-  val tapir = "0.12.14"
-  val flyway = "6.1.4"
+  val tapir = "0.12.17"
+  val flyway = "6.2.0"
   val zioLogging = "0.4.0"
-  val testcontainers = "0.34.2"
+  val testcontainers = "0.35.0"
   val zioMacros = "0.6.2"
-  val testcontainersPostgres = "1.12.4"
   val catsEffects = "2.0.0"
   val betterMonadicFor = "0.3.1"
 }
@@ -75,9 +74,9 @@ lazy val root = (project in file("."))
 
 // Scala libraries
 val testDeps = Seq(
-  "dev.zio"            %% "zio-test"             % Versions.zio                    % "test,it",
-  "com.dimafeng"       %% "testcontainers-scala" % Versions.testcontainers         % "test,it",
-  "org.testcontainers" % "postgresql"            % Versions.testcontainersPostgres % "test,it"
+  "dev.zio"            %% "zio-test"                          % Versions.zio                    % "test,it",
+  "com.dimafeng"       %% "testcontainers-scala"              % Versions.testcontainers         % "test,it",
+  "com.dimafeng"       %% "testcontainers-scala-postgresql"   % Versions.testcontainers         % "test,it"
 )
 
 val commonDeps = Seq(

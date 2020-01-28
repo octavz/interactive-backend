@@ -68,7 +68,7 @@ module FormInput = {
     };
 
     <FormGroup row=true>
-      <Label for_=id className="col-form-label text-right">
+      <Label for_=id className="col-form-label text-left">
         {ReasonReact.string(sprintf("%s:", label))}
       </Label>
       {switch (_type) {
@@ -128,27 +128,27 @@ module FormRadio = {
     };
 
     let renderRadio = ((label, _value): (string, string)) =>
-      <div
-        className="h-100 form-check form-check-inline"
-        key={sprintf("key_%s", _value)}>
-        <input
-          name=id
-          type_="radio"
-          checked={state == _value}
-          className="form-check-input"
-          value=_value
-          onChange={_ => handleOnChange(_value)}
-        />
-        <Label className="form-check-label" for_={id ++ value}>
-          {React.string(sprintf("%s(%s)", label, _value))}
+      <FormGroup check=true key={sprintf("key_%s", _value)}>
+        <Label check=true className="form-check-label" for_={id ++ value}>
+          <input
+            name=id
+            type_="radio"
+            checked={state == _value}
+            className="form-check-input"
+            value=_value
+            onChange={_ => handleOnChange(_value)}
+          />
+          {React.string(sprintf(" %s", label))}
         </Label>
-      </div>;
+      </FormGroup>;
 
-    <FormGroup row=true>
-      <Label className="col-form-label text-right" md=2 for_=id>
-        {React.string(label ++ ":")}
-      </Label>
-      <Col> {values |> Array.map(renderRadio) |> ReasonReact.array} </Col>
+    <FormGroup tag=id row=true>
+      <div className="d-flex flex-column">
+        <div> {React.string(label ++ ":")} </div>
+        <div className="d-flex flex-column">
+          {values |> Array.map(renderRadio) |> ReasonReact.array}
+        </div>
+      </div>
     </FormGroup>;
   };
 };
