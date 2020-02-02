@@ -79,6 +79,7 @@ let getCombos = (cbOK, cbErr) => {
     fieldOfWork: cmbFieldOfWork,
     englishLevel: cmbEnglishLevel,
   };
+
   Js.Promise.(
     make((~resolve, ~reject) => resolve(. combosDTO))
     |> then_(r => cbOK(r))
@@ -87,63 +88,4 @@ let getCombos = (cbOK, cbErr) => {
   );
 };
 
-open Belt;
 
-module type IO = {
-  type env;
-  type error;
-
-  type cause('e) =
-    | Empty
-    | Die(exn)
-    | Error('e);
-
-  type t(_) =
-    | Effect(unit => 'any): t(env, error, 'any)
-    | Bind(t(env, error, 'any), 'any => t(env, error, 'b)): t(env, error, 'b)
-    | Succeed('any): t(env, error, 'any)
-    | Fail(cause(error)): t(env, error, 'any)
-    | Done(Result.t('any, 'e)): t(env, error, 'any);
-
-  type stackEntry('any) = 'any => t(env, error, 'any);
-};
-
-module ZIO = (I: IO) => {
-
-  /* let nextInstr: (MutableStack.t(IO.stackEntry('any)),'any) => t(IO.env, IO.error, 'any); */
-  /* let run: t(IO.env, IO.error, 'any) => unit;  */
-  /* let nextInstr = value => { */
-  /*     switch(stack |> MutableStack.pop) { */
-  /*       | Some(k) => k(value) */
-  /*       | _ => Done(Ok(value)) */
-  /*       }; */
-  /* }; */
-  /*  */
-  /*  */
-  let rec run: 'any. I.t('a) => Result('any, I.error) =
-    zio => {
-        switch (zio) {
-        | Effect(f) =>
-          switch (f()) {
-          | res => currZio := Succeed(res)
-          | exception e =>
-            Js.log(
-              Format.sprintf("Unhandled error: %s", e |> Js.String.make),
-            );
-            currZio := Fail(Die(e));
-          }
-        | Bind(z, k) =>
-
-          switch (run(z)) {
-          | Ok(va) => currZio ;= k(va)
-          | Error(e) => Error(e)
-          }
-        | Succeed(v) => Ok(v)
-        | Fail(c) =>
-          switch (c) {
-          | Die(ex) => raise(ex)
-          | Error(e) => raise(e)
-          }
-        };
-  };
-};

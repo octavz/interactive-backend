@@ -1,11 +1,11 @@
 package com.wantsome
 
 package interactive
-
 import org.http4s._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
+import org.http4s.dsl.io._
 
 import zio._
 import zio.blocking.Blocking
@@ -23,6 +23,7 @@ import sttp.tapir.json.circe._
 import io.circe.generic.auto._
 
 import cats.implicits._
+import cats.effect.Blocker
 import com.github.mlangc.slf4zio.api._
 
 import com.wantsome.common._, db._
@@ -32,10 +33,10 @@ import com.wantsome.common.data._
 import com.wantsome.interactive.dto._
 
 object main extends zio.App with LoggingSupport with TapirJsonCirce {
-  type Env = AuthProvider with Clock
+  type Env = AuthProvider with Clock with Blocking
 
   def liveEnv(t: doobie.Transactor[Task]) =
-    new LiveAuthProvider with LiveDates with Clock.Live {
+    new LiveAuthProvider with LiveDates with Clock.Live with Blocking.Live {
 
       override val settingsProvider: SettingsProvider = LiveSettingsProvider
       override val repo = new LiveRepo {
@@ -49,7 +50,7 @@ object main extends zio.App with LoggingSupport with TapirJsonCirce {
 
   val port: Int = Option(System.getenv("HTTP_PORT"))
     .map(_.toInt)
-    .getOrElse(8080)
+    .getOrElse(5080)
 
   private def migrate: RIO[Any, Int] =
     LiveSettingsProvider.zioConfig >>= { c =>
@@ -100,12 +101,24 @@ object main extends zio.App with LoggingSupport with TapirJsonCirce {
     }
   }
 
+  def static(f: String, request: Request[AppS]) =
+    blocking.blockingExecutor flatMap { ex =>
+      StaticFile
+        .fromResource(f, Blocker.liftExecutionContext(ex.asEC), Some(request))
+        .getOrElse(Response.notFound[AppS])
+    }
+
+  val staticRoutes = HttpRoutes.of[AppS] {
+    case r @ GET -> Root / "register" => static("client/register/index.html", r)
+    case r @ GET -> Root / name => static(s"client/register/$name", r)
+  }
+
   val yaml = List(petEndpoint, combosEndpoint).toOpenAPI("Registration API", "1.0").toYaml
 
   def serve(implicit runtime: Runtime[Env]) =
     BlazeServerBuilder[AppS]
       .bindHttp(8080, "localhost")
-      .withHttpApp(Router("/" -> (combos <+> pet <+> new SwaggerHttp4s(yaml).routes[AppS])).orNotFound)
+      .withHttpApp(Router("/" -> (combos <+> pet <+> staticRoutes <+> new SwaggerHttp4s(yaml).routes[AppS])).orNotFound)
       .serve
       .compile
       .drain

@@ -1,5 +1,5 @@
 {
-  "name": "wantsome-platform-ui",
+  "name": "wantsome-register-client",
   "reason": {
     "react-jsx": 3
   },
@@ -23,6 +23,7 @@
     "reason-react",
     "@ahrefs/bs-reactstrap",
     "bs-fetch",
+    "bs-css",
     "decco"
   ],
   "ppx-flags": [

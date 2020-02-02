@@ -1,5 +1,5 @@
 {
-  "name": "cluster-manager-ui",
+  "name": "register-client",
   "version": "0.1.0",
   "scripts": {
     "build": "bsb -make-world",
@@ -11,12 +11,13 @@
     "server": "webpack-dev-server"
   },
   "keywords": [
-    "BuckleScript"
+    "wantsome"
   ],
-  "author": "",
-  "license": "MIT",
+  "author": "Octav Zaharia",
+  "license": "AGPL",
   "dependencies": {
     "@ahrefs/bs-reactstrap": "^1.0.3",
+    "bs-css": "^11.0.0",
     "bs-fetch": "^0.5.0",
     "decco": "^1.1.1",
     "react": "^16.11.0",
@@ -30,6 +31,7 @@
     "moduleserve": "^0.8.4",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9",
-    "webpack-dev-server": "^3.9.0"
+    "webpack-dev-server": "^3.9.0",
+    "write-file-webpack-plugin": "^4.5.1"
   }
 }
