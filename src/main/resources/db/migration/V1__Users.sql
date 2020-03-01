@@ -128,7 +128,6 @@ before update on quizzes for each row execute procedure set_update_date();
 
 create table question_sets (
   id varchar not null primary key,
-  quizz_id varchar not null references quizzes(id),
   title text not null,
   created timestamptz not null default now(),
   updated timestamptz not null default now()
@@ -159,6 +158,29 @@ create table questions (
 
 create trigger set_timestamp_questions
 before update on questions for each row execute procedure set_update_date();
+
+create table quizzes_questions(
+  quizz_id varchar not null references quizzes(id),
+  question_id varchar not null references questions(id),
+  created timestamptz not null default now(),
+  updated timestamptz not null default now(),
+  primary key(quizz_id,question_id)
+);
+
+create trigger set_timestamp_quizzes_questions
+before update on quizzes_questions for each row execute procedure set_update_date();
+
+create table quizz_answers(
+  id serial primary key,
+  question_id varchar not null references questions(id),
+  quizz_id varchar not null references quizzes(id),
+  answer text not null,
+  created timestamptz not null default now(),
+  updated timestamptz not null default now()
+);
+
+create trigger set_timestamp_quizz_answers
+before update on quizz_answers for each row execute procedure set_update_date();
 
 create table answers (
   id varchar not null primary key,
