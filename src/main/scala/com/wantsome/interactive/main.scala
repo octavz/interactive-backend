@@ -43,6 +43,7 @@ object main extends zio.App with LoggingSupport with TapirJsonCirce {
         override val transactorProvider = new TransactorProvider {
           override val transactor = t
         }
+        override val backend: StoreBackend = new SqlBackend {}
       }.repo
     }
 

@@ -1,4 +1,3 @@
-open BsReactstrap;
 open Format;
 
 type validator = {
@@ -21,8 +20,8 @@ module FormInput = {
         ~onValidate=?,
         ~_type=?,
         ~placeholder=?,
-        ~min=?,
-        ~max=?,
+        /* ~min=?, */
+        /* ~max=?, */
         ~maxLength=?,
         ~value=?,
         ~validators=?,
@@ -67,44 +66,46 @@ module FormInput = {
       |> Array.map(renderOpt);
     };
 
-    <FormGroup row=true>
-      <Label for_=id className="col-form-label text-left">
-        {ReasonReact.string(sprintf("%s:", label))}
-      </Label>
-      {switch (_type) {
-       | Some("textarea") =>
-         <textarea
-           id
-           placeholder=_placeholder
-           className="form-control"
-           maxLength={maxLength |> Js.Option.getWithDefault(10)}
-           onChange={e => handleOnChange(ReactEvent.Form.target(e)##value)}
-           value={state.value}
-         />
-       | Some("select") =>
-         <Input
-           _type="select"
-           id
-           invalid={String.length(state.error) > 0}
-           placeholder=_placeholder
-           value={state.value}
-           onChange={e => handleOnChange(ReactEvent.Form.target(e)##value)}>
-           {React.array(renderOptions())}
-         </Input>
-       | optType =>
-         <Input
-           _type={optType |> Js.Option.getWithDefault("text")}
-           id
-           invalid={String.length(state.error) > 0}
-           placeholder=_placeholder
-           min={min |> Js.Option.getWithDefault(0.0)}
-           max={max |> Js.Option.getWithDefault(100.0)}
-           value={state.value}
-           onChange={e => handleOnChange(ReactEvent.Form.target(e)##value)}
-         />
-       }}
-      <FormFeedback> {React.string(state.error)} </FormFeedback>
-    </FormGroup>;
+    <>
+        <label htmlFor=id>
+          {ReasonReact.string(sprintf("%s:", label))}
+        </label>
+        {switch (_type) {
+         | Some("textarea") =>
+           <textarea
+             className="input"
+             id
+             placeholder=_placeholder
+             maxLength={maxLength |> Js.Option.getWithDefault(10)}
+             onChange={e => handleOnChange(ReactEvent.Form.target(e)##value)}
+             value={state.value}
+           />
+         | Some("select") =>
+           <select
+             id
+             className="input"
+             //invalid={String.length(state.error) > 0}
+             placeholder=_placeholder
+             value={state.value}
+             onChange={e => handleOnChange(ReactEvent.Form.target(e)##value)}>
+             {React.array(renderOptions())}
+           </select>
+         | optType =>
+           <input
+             id
+             name=id
+             className="input"
+             type_={optType |> Js.Option.getWithDefault("text")}
+             //invalid={String.length(state.error) > 0}
+             placeholder=_placeholder
+             /* min={min |> Js.Option.getWithDefault(0.0)} */
+             /* max={max |> Js.Option.getWithDefault(100.0)} */
+             value={state.value}
+             onChange={e => handleOnChange(ReactEvent.Form.target(e)##value)}
+           />
+         }}
+        <span className="error"> {React.string(state.error)} </span>
+    </>;
   };
 };
 
@@ -128,8 +129,8 @@ module FormRadio = {
     };
 
     let renderRadio = ((label, _value): (string, string)) =>
-      <FormGroup check=true key={sprintf("key_%s", _value)}>
-        <Label check=true className="form-check-label" for_={id ++ value}>
+      <div key={sprintf("key_%s", _value)}>
+        <label>
           <input
             name=id
             type_="radio"
@@ -139,16 +140,14 @@ module FormRadio = {
             onChange={_ => handleOnChange(_value)}
           />
           {React.string(sprintf(" %s", label))}
-        </Label>
-      </FormGroup>;
+        </label>
+      </div>;
 
-    <FormGroup tag=id row=true>
-      <div className="d-flex flex-column">
-        <div> {React.string(label ++ ":")} </div>
-        <div className="d-flex flex-column">
-          {values |> Array.map(renderRadio) |> ReasonReact.array}
-        </div>
+    <>
+      <label className="label"> {React.string(label ++ ":")} </label>
+      <div className="input">
+        {values |> Array.map(renderRadio) |> ReasonReact.array}
       </div>
-    </FormGroup>;
+    </>;
   };
 };
