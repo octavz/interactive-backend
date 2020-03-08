@@ -1,6 +1,8 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const outputDir = path.join(__dirname, 'build/');
+
+const resDir= path.resolve(__dirname + '../../../src/main/resources/client');
+const outputDir = path.join(resDir, 'register/');
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -9,7 +11,7 @@ module.exports = {
   mode: isProd ? 'production' : 'development',
   output: {
     path: outputDir,
-    filename: 'Index.js'
+    filename: 'index.js'
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -25,3 +27,4 @@ module.exports = {
     historyApiFallback: true
   }
 };
+

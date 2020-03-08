@@ -6,15 +6,18 @@ lazy val Versions = new {
   val logback = "1.2.3"
   val doobie = "0.8.8"
   val pureconfig = "0.12.2"
-  val refined = "0.9.10"
-  val circe = "0.12.3"
-  val tapir = "0.12.12"
-  val flyway = "6.1.3"
+  val refined = "0.9.12"
+  val circe = "0.13.0"
+  val tapir = "0.12.21"
+  val flyway = "6.2.4"
   val zioLogging = "0.4.0"
-  val testcontainers = "0.34.2"
+  val testcontainers = "0.35.2"
+  val zioMacros = "0.6.2"
+  val catsEffects = "2.1.1"
+  val betterMonadicFor = "0.3.1"
 }
 
-//Global / onChangedBuildSource := ReloadOnSourceChanges
+Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion      := "2.13.1"
 ThisBuild / organization      := "com.wantsome"
@@ -24,7 +27,8 @@ ThisBuild / scalacOptions := Seq(
   "-Ywarn-unused",
   "-Ywarn-numeric-widen",
   "-deprecation",
-  "-Ywarn-value-discard"
+  "-Ywarn-value-discard",
+  "-Ymacro-annotations"
   //"-Xfatal-warnings"
 )
 
@@ -63,23 +67,23 @@ lazy val root = (project in file("."))
     name := "interactive",
     libraryDependencies ++= interactiveDeps,
     testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
-    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % Versions.betterMonadicFor)
   )
   .settings(Defaults.itSettings)
   .dependsOn(verifyr, testr)
 
 // Scala libraries
 val testDeps = Seq(
-  "dev.zio"            %% "zio-test"             % Versions.zio            % "test,it",
-  "com.dimafeng"       %% "testcontainers-scala" % Versions.testcontainers % "test,it",
-  "org.testcontainers" % "postgresql"            % "1.12.4"                % "test,it"
+  "dev.zio"            %% "zio-test"                          % Versions.zio                    % "test,it",
+  "com.dimafeng"       %% "testcontainers-scala"              % Versions.testcontainers         % "test,it",
+  "com.dimafeng"       %% "testcontainers-scala-postgresql"   % Versions.testcontainers         % "test,it"
 )
 
 val commonDeps = Seq(
   "dev.zio"                     %% "zio"                      % Versions.zio,
   "dev.zio"                     %% "zio-test-sbt"             % Versions.zio,
   "dev.zio"                     %% "zio-interop-cats"         % Versions.zioInteropCats,
-  "ch.qos.logback"              % "logback-classic"           % Versions.logback,
+  "dev.zio"                     %% "zio-macros-core"          % Versions.zioMacros,
   "org.tpolecat"                %% "doobie-core"              % Versions.doobie,
   "org.tpolecat"                %% "doobie-postgres"          % Versions.doobie,
   "org.tpolecat"                %% "doobie-hikari"            % Versions.doobie,
@@ -90,7 +94,6 @@ val commonDeps = Seq(
   "io.circe"                    %% "circe-generic"            % Versions.circe,
   "io.circe"                    %% "circe-refined"            % Versions.circe,
   "io.circe"                    %% "circe-parser"             % Versions.circe,
-  "org.flywaydb"                % "flyway-core"               % Versions.flyway,
   "com.github.mlangc"           %% "slf4zio"                  % Versions.zioLogging,
   "com.softwaremill.sttp.tapir" %% "tapir-core"               % Versions.tapir,
   "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"      % Versions.tapir,
@@ -98,15 +101,15 @@ val commonDeps = Seq(
   "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-http4s"  % Versions.tapir,
   "com.softwaremill.sttp.tapir" %% "tapir-redoc-http4s"       % Versions.tapir,
   "com.softwaremill.sttp.tapir" %% "tapir-openapi-docs"       % Versions.tapir,
-  "com.softwaremill.sttp.tapir" %% "tapir-openapi-circe-yaml" % Versions.tapir
+  "com.softwaremill.sttp.tapir" %% "tapir-openapi-circe-yaml" % Versions.tapir,
+  "ch.qos.logback"              % "logback-classic"           % Versions.logback,
+  "org.flywaydb"                % "flyway-core"               % Versions.flyway
 ) ++ testDeps
 
-val testrDeps = Seq(
-  ) ++ commonDeps
+val testrDeps = Seq() ++ commonDeps
 
-val verifyrDeps = Seq(
-  ) ++ commonDeps
+val verifyrDeps = Seq() ++ commonDeps
 
 val interactiveDeps = Seq(
-  "org.typelevel" %% "cats-effect" % "2.0.0"
+  "org.typelevel" %% "cats-effect" % Versions.catsEffects
 ) ++ commonDeps

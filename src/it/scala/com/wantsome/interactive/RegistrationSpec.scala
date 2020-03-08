@@ -106,8 +106,6 @@ object RegistrationSpec
                              .query[User]
                              .unique
                              .zio
-                  _ <- sql"""delete from groups_users""".update.run.zio
-                  _ <- sql"""delete from users""".update.run.zio
                 } yield assert(actual, equalTo(testUser))
             }
           }

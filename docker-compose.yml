@@ -6,7 +6,7 @@
 version: '2'
 services:
   postgres:
-    image: postgres
+    image: postgres:11.7
     ports:
       - 5432:5432
     environment:

@@ -5,3 +5,6 @@ target
 *.ipr
 *.iws
 node_modules
+client/node_modules
+client/lib
+client/build

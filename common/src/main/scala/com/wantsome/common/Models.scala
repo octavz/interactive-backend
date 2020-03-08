@@ -8,11 +8,18 @@ import eu.timepit.refined.boolean.And
 import eu.timepit.refined.collection.{MaxSize, NonEmpty}
 import java.sql.Timestamp
 
+import zio._
+
 private[common] trait Models {
 
   type DbStringConstraint = NonEmpty And MaxSize[W.`200`.T]
   type DbString = String Refined DbStringConstraint
   type Id = String
+
+  object Id {
+    def gen = ZIO.effectTotal(java.util.UUID.randomUUID().toString)
+  }
+
   type ComboId = Short
 
   case class ComboValue(id: ComboId, value: DbString, label: DbString)

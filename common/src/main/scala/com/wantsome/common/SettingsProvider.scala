@@ -2,14 +2,14 @@ package com.wantsome
 
 package common
 
-import zio.ZIO
+import zio.{IO, ZIO}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.NonEmpty
 import pureconfig._
 import pureconfig.generic.auto._
 import eu.timepit.refined.pureconfig._
 
-case class AppConfig(database: DatabaseConfig)
+case class AppConfig(invitationExpirationSeconds: Long, database: DatabaseConfig)
 
 case class DatabaseConfig(
   className: Refined[String, NonEmpty],
@@ -21,7 +21,7 @@ case class DatabaseConfig(
 trait SettingsProvider {
   val config: Either[Throwable, AppConfig]
 
-  val zioConfig = ZIO.fromEither(config)
+  val zioConfig: IO[Throwable, AppConfig] = ZIO.fromEither(config)
 }
 
 trait LiveSettingsProvider extends SettingsProvider {
@@ -34,3 +34,5 @@ trait LiveSettingsProvider extends SettingsProvider {
         Left(new Exception(errString))
     }
 }
+
+object LiveSettingsProvider extends LiveSettingsProvider
