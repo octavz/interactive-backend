@@ -1,19 +1,35 @@
-package com.wantsome
+package com.wantsome.common
 
-package common
-
-package db
-
-import doobie.Transactor
-import doobie.hikari.HikariTransactor
-import eu.timepit.refined.auto._
 import zio._
 import zio.interop.catz._
+import zio.blocking.Blocking
+import doobie._
+import doobie.hikari.HikariTransactor
+import doobie.util.transactor.Transactor
+import eu.timepit.refined.auto._
 import scala.concurrent.ExecutionContext
 
-import com.wantsome.common.DatabaseConfig
+import com.wantsome.common.config._
+import data._
 
-package object transactor {
+package object db {
+  type TransactorProvider = Has[TransactorProvider.Service]
+
+  object TransactorProvider {
+
+    trait Service {
+      val transactor: Transactor[Task]
+    }
+
+    def transactor =
+      ZIO.access[TransactorProvider](_.get.transactor)
+
+    def live(t: Transactor[Task]): ZLayer.NoDeps[Nothing, TransactorProvider] =
+      ZLayer.succeed(new Service {
+        override val transactor: Transactor[Task] = t
+      })
+
+  }
 
   def mkTransactor(
     config: DatabaseConfig,

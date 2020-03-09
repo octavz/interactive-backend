@@ -56,4 +56,12 @@ private[common] trait Models {
   case class Question(id: Id, questionSetId: Id, content: String)
   case class Answer(id: Id, questionId: Id, content: String, isCorrect: Boolean)
 
+  case class AppConfig(invitationExpirationSeconds: Long, database: DatabaseConfig)
+
+  case class DatabaseConfig(
+    className: Refined[String, NonEmpty],
+    url: Refined[String, NonEmpty],
+    schema: Refined[String, NonEmpty],
+    user: Refined[String, NonEmpty],
+    password: Refined[String, NonEmpty])
 }

@@ -1,8 +1,8 @@
 lazy val Versions = new {
   val kindProjector = "0.11.0"
   val scalamacros = "2.1.1"
-  val zio = "1.0.0-RC18-1+20-c9cb6ec0-SNAPSHOT"
-  val zioInteropCats = "2.0.0.0-RC11"
+  val zio = "1.0.0-RC18-1+27-ac79039b-SNAPSHOT"
+  val zioInteropCats = "2.0.0.0-RC11+1-87261427-SNAPSHOT"
   val logback = "1.2.3"
   val doobie = "0.8.8"
   val pureconfig = "0.12.2"
@@ -12,7 +12,6 @@ lazy val Versions = new {
   val flyway = "6.2.4"
   val zioLogging = "0.4.0"
   val testcontainers = "0.35.2"
-  val zioMacros = "0.6.2"
   val catsEffects = "2.1.1"
   val betterMonadicFor = "0.3.1"
 }
@@ -23,6 +22,7 @@ ThisBuild / scalaVersion      := "2.13.1"
 ThisBuild / organization      := "com.wantsome"
 ThisBuild / scalafmtOnCompile := true
 ThisBuild / turbo             := false
+ThisBuild / resolvers         ++= Seq(Opts.resolver.sonatypeSnapshots, Opts.resolver.sonatypeReleases)
 ThisBuild / scalacOptions := Seq(
   "-Ywarn-unused",
   "-Ywarn-numeric-widen",
@@ -36,7 +36,6 @@ IntegrationTest / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Fla
 
 lazy val common = (project in file("common"))
   .configs(IntegrationTest)
-  .settings(resolvers += Resolver.sonatypeRepo("releases"))
   .settings(
     libraryDependencies ++= commonDeps,
     name := "common"
@@ -83,7 +82,6 @@ val commonDeps = Seq(
   "dev.zio"                     %% "zio"                      % Versions.zio,
   "dev.zio"                     %% "zio-test-sbt"             % Versions.zio,
   "dev.zio"                     %% "zio-interop-cats"         % Versions.zioInteropCats,
-  "dev.zio"                     %% "zio-macros-core"          % Versions.zioMacros,
   "org.tpolecat"                %% "doobie-core"              % Versions.doobie,
   "org.tpolecat"                %% "doobie-postgres"          % Versions.doobie,
   "org.tpolecat"                %% "doobie-hikari"            % Versions.doobie,

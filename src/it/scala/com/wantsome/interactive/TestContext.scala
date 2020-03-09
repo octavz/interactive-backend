@@ -1,18 +1,16 @@
 package com.wantsome.interactive
 
 import zio.{test => _, _}
-
 import eu.timepit.refined._
 import eu.timepit.refined.auto._
 import eu.timepit.refined.collection.NonEmpty
-
 import doobie._
-import scala.concurrent.ExecutionContext
 
+import scala.concurrent.ExecutionContext
 import com.wantsome.common.db.migration
-import com.wantsome.common.DatabaseConfig
 import com.wantsome.verifyr.auth._
 import com.wantsome.common.TransactorProvider
+import com.wantsome.common.config.DatabaseConfig
 import zio.random._
 
 trait TestContext {
