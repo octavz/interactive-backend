@@ -1,8 +1,8 @@
 lazy val Versions = new {
   val kindProjector = "0.11.0"
   val scalamacros = "2.1.1"
-  val zio = "1.0.0-RC18-1+27-ac79039b-SNAPSHOT"
-  val zioInteropCats = "2.0.0.0-RC11+1-87261427-SNAPSHOT"
+  val zio = "1.0.0-RC18-2"
+  val zioInteropCats = "2.0.0.0-RC12"
   val logback = "1.2.3"
   val doobie = "0.8.8"
   val pureconfig = "0.12.2"
