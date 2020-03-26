@@ -10,9 +10,10 @@ object dto {
   case class ComboValueDTO(id: Short, value: String, label: String)
 
   case class CombosDTO(
-    occupation: List[ComboValueDTO],
-    fieldOfWork: List[ComboValueDTO],
-    englishLevel: List[ComboValueDTO])
+      occupation: List[ComboValueDTO],
+      fieldOfWork: List[ComboValueDTO],
+      englishLevel: List[ComboValueDTO]
+  )
 
   object ComboValueDTO {
 
@@ -21,18 +22,19 @@ object dto {
   }
 
   case class UserDTO(
-    id: Option[Id],
-    email: String,
-    firstName: String,
-    lastName: String,
-    birthday: Timestamp,
-    city: String,
-    phone: String,
-    occupation: Short,
-    fieldOfWork: Short,
-    englishLevel: Short,
-    itExperience: Boolean,
-    experienceDescription: Option[String],
-    heardFrom: String)
+      id: Option[Id],
+      email: String,
+      firstName: String,
+      lastName: String,
+      birthday: Timestamp,
+      city: String,
+      phone: String,
+      occupation: Short,
+      fieldOfWork: Short,
+      englishLevel: Short,
+      itExperience: Boolean,
+      experienceDescription: Option[String],
+      heardFrom: String
+  )
 
 }

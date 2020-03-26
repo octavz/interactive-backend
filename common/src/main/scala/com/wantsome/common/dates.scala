@@ -7,7 +7,7 @@ import java.time._
 
 import com.wantsome.common.dates.Dates
 
-package object dates {
+object dates {
   type Dates = Has[Dates.Service]
 
   object Dates {

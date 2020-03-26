@@ -1,6 +1,4 @@
-package com.wantsome
-
-package common
+package com.wantsome.common
 
 import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
@@ -31,19 +29,19 @@ private[common] trait Models {
   case object FieldOfWork extends ComboType
 
   case class User(
-    id: Id,
-    email: DbString,
-    firstName: DbString,
-    lastName: DbString,
-    birthday: Timestamp,
-    city: DbString,
-    phone: DbString,
-    occupation: Short,
-    fieldOfWork: Short,
-    englishLevel: Short,
-    itExperience: Boolean,
-    experienceDescription: Option[String],
-    heardFrom: String
+      id: Id,
+      email: DbString,
+      firstName: DbString,
+      lastName: DbString,
+      birthday: Timestamp,
+      city: DbString,
+      phone: DbString,
+      occupation: Short,
+      fieldOfWork: Short,
+      englishLevel: Short,
+      itExperience: Boolean,
+      experienceDescription: Option[String],
+      heardFrom: String
   )
 
   case class Group(id: Id, description: String)
@@ -56,12 +54,16 @@ private[common] trait Models {
   case class Question(id: Id, questionSetId: Id, content: String)
   case class Answer(id: Id, questionId: Id, content: String, isCorrect: Boolean)
 
-  case class AppConfig(invitationExpirationSeconds: Long, database: DatabaseConfig)
+  case class AppConfig(
+      invitationExpirationSeconds: Long,
+      database: DatabaseConfig
+  )
 
   case class DatabaseConfig(
-    className: Refined[String, NonEmpty],
-    url: Refined[String, NonEmpty],
-    schema: Refined[String, NonEmpty],
-    user: Refined[String, NonEmpty],
-    password: Refined[String, NonEmpty])
+      className: Refined[String, NonEmpty],
+      url: Refined[String, NonEmpty],
+      schema: Refined[String, NonEmpty],
+      user: Refined[String, NonEmpty],
+      password: Refined[String, NonEmpty]
+  )
 }

@@ -9,7 +9,7 @@ import pureconfig.ConfigSource
 import zio.ZLayer.NoDeps
 import zio._
 
-package object config {
+object config {
 
   type SettingsProvider = Has[SettingsProvider.Service]
 

@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext
 import com.wantsome.common.config._
 import data._
 
-package object db {
+object db {
   type TransactorProvider = Has[TransactorProvider.Service]
 
   object TransactorProvider {
@@ -24,7 +24,7 @@ package object db {
     def transactor =
       ZIO.access[TransactorProvider](_.get.transactor)
 
-    def live(t: Transactor[Task]): ZLayer.NoDeps[Nothing, TransactorProvider] =
+    def live(t: Transactor[Task]): ULayer[TransactorProvider] =
       ZLayer.succeed(new Service {
         override val transactor: Transactor[Task] = t
       })
@@ -32,9 +32,10 @@ package object db {
   }
 
   def mkTransactor(
-    config: DatabaseConfig,
-    connectEC: ExecutionContext,
-    transactEC: ExecutionContext): Managed[Throwable, Transactor[Task]] = {
+      config: DatabaseConfig,
+      connectEC: ExecutionContext,
+      transactEC: ExecutionContext
+  ): Managed[Throwable, Transactor[Task]] = {
     val xa = HikariTransactor
       .newHikariTransactor[Task](
         config.className,
@@ -42,7 +43,8 @@ package object db {
         config.user,
         config.password,
         connectEC,
-        cats.effect.Blocker.liftExecutionContext(transactEC))
+        cats.effect.Blocker.liftExecutionContext(transactEC)
+      )
       .map { r =>
         r.kernel.setSchema(config.schema)
         r

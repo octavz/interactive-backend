@@ -5,15 +5,15 @@ lazy val Versions = new {
   val zioInteropCats = "2.0.0.0-RC12"
   val logback = "1.2.3"
   val doobie = "0.8.8"
-  val pureconfig = "0.12.2"
-  val refined = "0.9.12"
+  val pureconfig = "0.12.3"
+  val refined = "0.9.13"
   val circe = "0.13.0"
-  val tapir = "0.12.21"
-  val flyway = "6.2.4"
-  val zioLogging = "0.4.0"
-  val testcontainers = "0.35.2"
+  val tapir = "0.12.25"
+  val flyway = "6.3.1"
+  val testcontainers = "0.36.1"
   val catsEffects = "2.1.1"
   val betterMonadicFor = "0.3.1"
+  val zioLogging = "0.2.5"
 }
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -74,6 +74,7 @@ lazy val root = (project in file("."))
 // Scala libraries
 val testDeps = Seq(
   "dev.zio"            %% "zio-test"                          % Versions.zio                    % "test,it",
+  "dev.zio"            %% "zio-test-magnolia"                 % Versions.zio                    % "test,it",
   "com.dimafeng"       %% "testcontainers-scala"              % Versions.testcontainers         % "test,it",
   "com.dimafeng"       %% "testcontainers-scala-postgresql"   % Versions.testcontainers         % "test,it"
 )
@@ -92,7 +93,6 @@ val commonDeps = Seq(
   "io.circe"                    %% "circe-generic"            % Versions.circe,
   "io.circe"                    %% "circe-refined"            % Versions.circe,
   "io.circe"                    %% "circe-parser"             % Versions.circe,
-  "com.github.mlangc"           %% "slf4zio"                  % Versions.zioLogging,
   "com.softwaremill.sttp.tapir" %% "tapir-core"               % Versions.tapir,
   "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"      % Versions.tapir,
   "com.softwaremill.sttp.tapir" %% "tapir-json-circe"         % Versions.tapir,
@@ -101,7 +101,8 @@ val commonDeps = Seq(
   "com.softwaremill.sttp.tapir" %% "tapir-openapi-docs"       % Versions.tapir,
   "com.softwaremill.sttp.tapir" %% "tapir-openapi-circe-yaml" % Versions.tapir,
   "ch.qos.logback"              % "logback-classic"           % Versions.logback,
-  "org.flywaydb"                % "flyway-core"               % Versions.flyway
+  "org.flywaydb"                % "flyway-core"               % Versions.flyway,
+  "dev.zio"                     %% "zio-logging-slf4j"        % Versions.zioLogging 
 ) ++ testDeps
 
 val testrDeps = Seq() ++ commonDeps

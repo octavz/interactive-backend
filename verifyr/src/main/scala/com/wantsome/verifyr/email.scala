@@ -1,4 +1,4 @@
-package com.wantsome.verifyr.auth
+package com.wantsome.verifyr
 import zio._
 
 object email {
