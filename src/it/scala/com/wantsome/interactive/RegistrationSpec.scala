@@ -131,9 +131,7 @@ object RegistrationSpec extends DefaultRunnableSpec {
       )
 
     val ll: ULayer[Logging] =
-      (console.Console.live ++ clock.Clock.live) >>> Logging.console((_, s) =>
-        s
-      )
+      (console.Console.live ++ clock.Clock.live) >>> Logging.console((_, s) => s)
     ( ( cl >>> sl) ++ ll ++ cl) >>> tl
   }
 
