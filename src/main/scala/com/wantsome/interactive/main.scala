@@ -88,18 +88,6 @@ object main extends zio.App with TapirJsonCirce {
       .mapError(_.getMessage)
   }
 
-  def static(f: String, request: Request[AppS]) =
-    ZIO.access[Blocking](_.get.blockingExecutor.asEC).flatMap { ec =>
-      StaticFile
-        .fromResource(f, Blocker.liftExecutionContext(ec), Some(request))
-        .getOrElse(Response.notFound[AppS])
-    }
-
-  val staticRoutes: HttpRoutes[AppS] = HttpRoutes.of[AppS] {
-    case r @ GET -> Root / "register" => static("client/register/index.html", r)
-    case r @ GET -> Root / name       => static(s"client/register/$name", r)
-  }
-
   val yaml = List(combosEndpoint).toOpenAPI("Registration API", "1.0").toYaml
 
   def serve(implicit r: Runtime[AuthProvider with Clock with Blocking]) =
@@ -107,7 +95,7 @@ object main extends zio.App with TapirJsonCirce {
       .bindHttp(8080, "localhost")
       .withHttpApp(
         Router(
-          "/" -> (combos <+> staticRoutes <+> new SwaggerHttp4s(yaml)
+          "/" -> (combos <+> new SwaggerHttp4s(yaml)
             .routes[AppS])
         ).orNotFound
       )
